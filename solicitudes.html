@@ -204,7 +204,7 @@
         <h2 class="page-title">📋 Gestión de Solicitudes</h2>
 
         <div class="content-grid">
-            <!-- Formulario conectado a productos -->
+            <!-- Formulario de Solicitud -->
             <div class="card-form">
                 <h3>Nueva Solicitud de Producto</h3>
                 <form id="solicitudForm">
@@ -290,7 +290,6 @@
             window.location.href = "login.html";
         });
 
-        // Cargar los productos existentes en el menú desplegable
         async function cargarProductosEnSelect() {
             try {
                 const response = await fetch(`${API_URL}/api/productos`, {
@@ -319,11 +318,10 @@
                     select.appendChild(option);
                 });
             } catch (error) {
-                console.error("Error al cargar productos para el select:", error);
+                console.error("Error al cargar productos:", error);
             }
         }
 
-        // Cargar solicitudes usando la ruta correcta en plural (/api/solicitudes)
         async function cargarSolicitudes() {
             try {
                 const response = await fetch(`${API_URL}/api/solicitudes`, {
@@ -348,6 +346,17 @@
                 solicitudes.forEach(sol => {
                     const tr = document.createElement("tr");
                     
+                    // Si es ADMIN, se muestra un menú desplegable para cambiar el estado al vuelo
+                    let celdaEstado = rolUsuario === "ADMIN" 
+                        ? `<td>
+                             <select onchange="cambiarEstado('${sol._id || sol.id}', this.value)">
+                                <option value="Pendiente" ${sol.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                                <option value="Aprobada" ${sol.estado === 'Aprobada' ? 'selected' : ''}>Aprobada</option>
+                                <option value="Rechazada" ${sol.estado === 'Rechazada' ? 'selected' : ''}>Rechazada</option>
+                             </select>
+                           </td>`
+                        : `<td>${sol.estado || 'Pendiente'}</td>`;
+
                     let columnaAccion = rolUsuario === "ADMIN" 
                         ? `<td><button class="btn-danger" onclick="eliminarSolicitud('${sol._id || sol.id}')">Eliminar</button></td>`
                         : `<td>-</td>`;
@@ -359,7 +368,7 @@
                         <td>${nombreProducto}</td>
                         <td>${cantidadSolicitada}</td>
                         <td>${sol.prioridad || ''}</td>
-                        <td>${sol.estado || 'Pendiente'}</td>
+                        ${celdaEstado}
                         ${columnaAccion}
                     `;
                     tbody.appendChild(tr);
@@ -369,7 +378,30 @@
             }
         }
 
-        // Enviar nueva solicitud a /api/solicitudes
+        // Función para cambiar el estado (Solo ADMIN)
+        async function cambiarEstado(id, nuevoEstado) {
+            try {
+                const response = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                if (response.ok) {
+                    alert("¡Estado actualizado con éxito!");
+                    cargarSolicitudes();
+                } else {
+                    alert("Error al actualizar el estado.");
+                }
+            } catch (error) {
+                console.error("Error de red:", error);
+                alert("No se pudo conectar con el servidor.");
+            }
+        }
+
         document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -405,7 +437,6 @@
             }
         });
 
-        // Eliminar solicitud usando /api/solicitudes
         async function eliminarSolicitud(id) {
             if (rolUsuario !== "ADMIN") {
                 alert("No tienes permisos para realizar esta acción.");
