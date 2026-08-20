@@ -16,7 +16,6 @@
             background-color: #f4f6f9;
             height: 100vh;
         }
-        /* Barra lateral */
         .sidebar {
             width: 250px;
             background-color: #1e293b;
@@ -82,8 +81,6 @@
         .btn-logout:hover {
             text-decoration: underline;
         }
-        
-        /* Contenido principal en dos columnas */
         .main-content {
             flex: 1;
             padding: 30px;
@@ -152,6 +149,18 @@
         .btn-primary:hover {
             background-color: #1d4ed8;
         }
+        .btn-danger {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -176,13 +185,10 @@
 </head>
 <body>
 
-    <!-- Sidebar -->
     <div class="sidebar">
         <div>
             <h2>📦 Sistema Inventario</h2>
-            <nav id="sidebarNav">
-                <!-- Se llena dinámicamente según el rol -->
-            </nav>
+            <nav id="sidebarNav"></nav>
         </div>
         <div class="user-info">
             <div class="user-avatar" id="userAvatar">U</div>
@@ -194,12 +200,10 @@
         </div>
     </div>
 
-    <!-- Contenido Principal -->
     <div class="main-content">
         <h2 class="page-title">📋 Gestión de Solicitudes</h2>
 
         <div class="content-grid">
-            <!-- Formulario Izquierda -->
             <div class="card-form">
                 <h3>Nueva Solicitud</h3>
                 <form id="solicitudForm">
@@ -223,7 +227,6 @@
                 </form>
             </div>
 
-            <!-- Tabla Derecha -->
             <div class="card-table">
                 <h3>Solicitudes Registradas</h3>
                 <table>
@@ -232,7 +235,7 @@
                             <th>Título</th>
                             <th>Prioridad</th>
                             <th>Estado</th>
-                            <th>Acción</th>
+                            <th id="thAccionSolicitud">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="tablaSolicitudes">
@@ -248,25 +251,22 @@
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
+        const rolUsuario = localStorage.getItem("rolUsuario") || "USER";
 
         document.addEventListener("DOMContentLoaded", () => {
             const nombre = localStorage.getItem("nombreUsuario") || "Usuario";
-            const rol = localStorage.getItem("rolUsuario") || "USER";
-
             document.getElementById("userName").textContent = nombre;
-            document.getElementById("userTag").textContent = rol;
+            document.getElementById("userTag").textContent = rolUsuario;
             document.getElementById("userAvatar").textContent = nombre.charAt(0).toUpperCase();
 
-            // Configurar el menú lateral según el rol
             const nav = document.getElementById("sidebarNav");
-            if (rol === "ADMIN") {
+            if (rolUsuario === "ADMIN") {
                 nav.innerHTML = `
                     <a href="index.html">Productos</a>
                     <a href="solicitudes.html" class="active">Solicitudes</a>
                     <a href="reportes.html">Reportes</a>
                 `;
             } else {
-                // Si es empleado, SOLO ve solicitudes y se le oculta productos/reportes
                 nav.innerHTML = `
                     <a href="solicitudes.html" class="active">Solicitudes</a>
                 `;
@@ -303,16 +303,50 @@
                 tbody.innerHTML = "";
                 solicitudes.forEach(sol => {
                     const tr = document.createElement("tr");
+                    
+                    // Si es Admin ve el botón de eliminar, si es empleado ve un guion o celda vacía
+                    let columnaAccion = rolUsuario === "ADMIN" 
+                        ? `<td><button class="btn-danger" onclick="eliminarSolicitud('${sol._id || sol.id}')">Eliminar</button></td>`
+                        : `<td>-</td>`;
+
                     tr.innerHTML = `
                         <td>${sol.titulo || ''}</td>
                         <td>${sol.prioridad || ''}</td>
                         <td>${sol.estado || 'Pendiente'}</td>
-                        <td>-</td>
+                        ${columnaAccion}
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (error) {
                 console.error("Error al cargar solicitudes:", error);
+            }
+        }
+
+        async function eliminarSolicitud(id) {
+            if (rolUsuario !== "ADMIN") {
+                alert("No tienes permisos para realizar esta acción.");
+                return;
+            }
+
+            if (!confirm("¿Estás seguro de eliminar esta solicitud?")) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/solicitudes/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert("Solicitud eliminada con éxito");
+                    cargarSolicitudes();
+                } else {
+                    alert("Error al eliminar la solicitud.");
+                }
+            } catch (error) {
+                console.error("Error de red:", error);
+                alert("No se pudo conectar con el servidor.");
             }
         }
 

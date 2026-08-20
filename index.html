@@ -16,7 +16,6 @@
             background-color: #f4f6f9;
             height: 100vh;
         }
-        /* Barra lateral */
         .sidebar {
             width: 250px;
             background-color: #1e293b;
@@ -82,8 +81,6 @@
         .btn-logout:hover {
             text-decoration: underline;
         }
-        
-        /* Contenido principal en dos columnas */
         .main-content {
             flex: 1;
             padding: 30px;
@@ -149,6 +146,18 @@
         .btn-primary:hover {
             background-color: #1d4ed8;
         }
+        .btn-danger {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -173,13 +182,10 @@
 </head>
 <body>
 
-    <!-- Sidebar -->
     <div class="sidebar">
         <div>
             <h2>📦 Sistema Inventario</h2>
-            <nav id="sidebarNav">
-                <!-- Se llena dinámicamente según el rol -->
-            </nav>
+            <nav id="sidebarNav"></nav>
         </div>
         <div class="user-info">
             <div class="user-avatar" id="userAvatar">A</div>
@@ -191,12 +197,10 @@
         </div>
     </div>
 
-    <!-- Contenido Principal -->
     <div class="main-content">
         <h2 class="page-title">📦 Gestión de Productos</h2>
 
         <div class="content-grid">
-            <!-- Formulario Izquierda -->
             <div class="card-form">
                 <h3>Registrar Nuevo Producto</h3>
                 <form id="productForm">
@@ -228,7 +232,6 @@
                 </form>
             </div>
 
-            <!-- Tabla Derecha -->
             <div class="card-table">
                 <h3>Inventario Actual</h3>
                 <table>
@@ -240,11 +243,12 @@
                             <th>Cant.</th>
                             <th>Unidad</th>
                             <th>Stock Mín.</th>
+                            <th id="thAcciones">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaProductos">
                         <tr>
-                            <td colspan="6" class="no-data">No hay productos registrados.</td>
+                            <td colspan="7" class="no-data">No hay productos registrados.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -257,7 +261,6 @@
         const token = localStorage.getItem("token");
         const rolUsuario = localStorage.getItem("rolUsuario") || "USER";
 
-        // Protección de ruta: Si no es admin, fuera de aquí
         if (rolUsuario !== "ADMIN") {
             alert("Acceso denegado. Sección exclusiva para administradores.");
             window.location.href = "solicitudes.html";
@@ -265,12 +268,10 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             const nombre = localStorage.getItem("nombreUsuario") || "Administrador";
-
             document.getElementById("userName").textContent = nombre;
             document.getElementById("userTag").textContent = rolUsuario;
             document.getElementById("userAvatar").textContent = nombre.charAt(0).toUpperCase();
 
-            // Renderizar menú exclusivo de Administrador
             const nav = document.getElementById("sidebarNav");
             nav.innerHTML = `
                 <a href="index.html" class="active">Productos</a>
@@ -302,7 +303,7 @@
                 const tbody = document.getElementById("tablaProductos");
 
                 if (productos.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="no-data">No hay productos registrados.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="no-data">No hay productos registrados.</td></tr>`;
                     return;
                 }
 
@@ -316,11 +317,35 @@
                         <td>${prod.cantidad || 0}</td>
                         <td>${prod.unidadMedida || ''}</td>
                         <td>${prod.stockMinimo || 0}</td>
+                        <td><button class="btn-danger" onclick="eliminarProducto('${prod._id || prod.id}')">Eliminar</button></td>
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (error) {
                 console.error("Error al cargar productos:", error);
+            }
+        }
+
+        async function eliminarProducto(id) {
+            if (!confirm("¿Estás seguro de eliminar este producto?")) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/productos/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert("Producto eliminado correctamente");
+                    cargarProductos();
+                } else {
+                    alert("Error al eliminar el producto");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("No se pudo conectar con el servidor.");
             }
         }
 
