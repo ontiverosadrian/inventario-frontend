@@ -1,352 +1,274 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Inventario</title>
-  <style>
-    :root {
-      --sidebar-bg: #1e293b;
-      --sidebar-hover: #334155;
-      --sidebar-text: #94a3b8;
-      --sidebar-text-active: #ffffff;
-      --primary-color: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg-color: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --danger: #ef4444;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      margin: 0;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* Barra Lateral */
-    aside {
-      width: 240px;
-      background-color: var(--sidebar-bg);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 20px 15px;
-      color: white;
-    }
-
-    .brand {
-      font-size: 16px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 25px;
-      padding-left: 10px;
-    }
-
-    .menu-links {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      flex-grow: 1;
-    }
-
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      color: var(--sidebar-text);
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-
-    .menu-item:hover, .menu-item.active {
-      background-color: var(--sidebar-hover);
-      color: var(--sidebar-text-active);
-    }
-
-    .sidebar-footer {
-      border-top: 1px solid #334155;
-      padding-top: 15px;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-      padding-left: 5px;
-    }
-
-    .user-avatar {
-      width: 32px; height: 32px;
-      background: var(--primary-color);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: bold; color: white; font-size: 13px;
-    }
-
-    .user-name { font-size: 13px; font-weight: bold; color: white; display: block; }
-    .user-role { font-size: 10px; background: var(--primary-color); color: white; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
-
-    .btn-salir {
-      width: 100%; background: transparent; color: #f87171; border: 1px solid #f87171;
-      padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px;
-      display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
-    }
-    .btn-salir:hover { background-color: var(--danger); color: white; border-color: var(--danger); }
-
-    /* Contenido Principal */
-    main { flex-grow: 1; padding: 30px; overflow-y: auto; }
-    .main-header { font-size: 20px; font-weight: bold; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
-
-    .content-grid { display: grid; grid-template-columns: 380px 1fr; gap: 25px; }
-    @media (max-width: 1000px) { .content-grid { grid-template-columns: 1fr; } }
-
-    .card { background: var(--card-bg); padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); height: fit-content; }
-    .card h2 { margin-top: 0; font-size: 16px; margin-bottom: 20px; font-weight: bold; }
-
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
-    .form-group input, .form-group select { width: 100%; padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: #fff; }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .btn-primary { width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 11px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; }
-    .btn-primary:hover { background-color: var(--primary-hover); }
-
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-    th { color: var(--text-muted); font-weight: 600; padding: 10px; border-bottom: 1px solid var(--border-color); }
-    td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); }
-
-    .btn-icon-danger { background: transparent; border: 1px solid #fecaca; color: var(--danger); padding: 5px 8px; border-radius: 6px; cursor: pointer; }
-    .btn-icon-danger:hover { background: var(--danger); color: white; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            background-color: #f4f6f9;
+            height: 100vh;
+        }
+        /* Barra lateral */
+        .sidebar {
+            width: 250px;
+            background-color: #1e293b;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .sidebar h2 {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .sidebar nav a {
+            display: block;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: 0.3s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background-color: #334155;
+            color: white;
+        }
+        .user-info {
+            border-top: 1px solid #334155;
+            padding-top: 15px;
+        }
+        .btn-logout {
+            width: 100%;
+            padding: 8px;
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-logout:hover {
+            background-color: #b91c1c;
+        }
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .card h3 {
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #475569;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table th, table td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        table th {
+            background-color: #f8fafc;
+            color: #475569;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Barra lateral -->
-  <aside>
-    <div>
-      <div class="brand"><span>📦</span> Sistema Inventario</div>
-      <div class="menu-links" id="menuLinks">
-        <a href="index.html" class="menu-item active">📦 Productos</a>
-        <a href="solicitudes.html" class="menu-item">📋 Solicitudes</a>
-        <!-- Reportes se gestionará dinámicamente -->
-      </div>
-    </div>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar" id="avatarLetra">A</div>
-        <div class="user-details">
-          <span class="user-name" id="nombreUsuario">Administrador</span>
-          <span class="user-role" id="rolUsuario">ADMIN</span>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div>
+            <h2>📦 Sistema Inventario</h2>
+            <nav>
+                <a href="#" class="active">Productos</a>
+                <a href="solicitudes.html">Solicitudes</a>
+                <a href="reportes.html">Reportes</a>
+            </nav>
         </div>
-      </div>
-      <button class="btn-salir" id="btnCerrarSesion">🚪 Cerrar Sesión</button>
-    </div>
-  </aside>
-
-  <!-- Panel principal -->
-  <main>
-    <div class="main-header">
-      <span>📦 Gestión de Productos</span>
+        <div class="user-info">
+            <p><strong>Administrador</strong></p>
+            <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
+        </div>
     </div>
 
-    <div class="content-grid">
-      <!-- Formulario para agregar producto (Se oculta automáticamente si es empleado) -->
-      <div class="card" id="cardFormulario">
-        <h2>Registrar Nuevo Producto</h2>
-        <form id="formProducto">
-          <div class="form-group">
-            <label>Nombre del Producto</label>
-            <input type="text" id="nombre" required placeholder="Ej. Laptops">
-          </div>
-          <div class="form-group">
-            <label>Descripción</label>
-            <input type="text" id="descripcion" placeholder="Detalles opcionales">
-          </div>
-          <div class="form-group">
-            <label>Categoría</label>
-            <input type="text" id="categoria" required placeholder="Ej. Electrónica">
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Cantidad</label>
-              <input type="number" id="cantidad" required min="0" placeholder="10">
-            </div>
-            <div class="form-group">
-              <label>Unidad de Medida</label>
-              <input type="text" id="unidadMedida" required placeholder="Pz, Kg, etc.">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Stock Mínimo</label>
-            <input type="number" id="stockMinimo" required min="0" placeholder="2">
-          </div>
-          <button type="submit" class="btn-primary">Guardar Producto</button>
-        </form>
-      </div>
+    <!-- Contenido -->
+    <div class="main-content">
+        <div class="card">
+            <h3>Registrar Nuevo Producto</h3>
+            <form id="productForm">
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="nombre" required placeholder="Ej. Monitor gamer">
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <input type="text" id="descripcion" placeholder="Ej. Monitor alta gama">
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <input type="text" id="categoria" placeholder="Ej. Electrónica">
+                </div>
+                <div class="form-group">
+                    <label>Cantidad</label>
+                    <input type="number" id="cantidad" required placeholder="10">
+                </div>
+                <div class="form-group">
+                    <label>Stock Mínimo</label>
+                    <input type="number" id="stockMinimo" required placeholder="2">
+                </div>
+                <button type="submit" class="btn-primary">Guardar Producto</button>
+            </form>
+        </div>
 
-      <!-- Tabla de productos -->
-      <div class="card" id="cardTabla" style="grid-column: span 1;">
-        <h2>Inventario Actual</h2>
-        <table>
-          <thead id="tablaHead">
-            <tr>
-              <th>Nombre</th>
-              <th>Categoría</th>
-              <th>Cant.</th>
-              <th>Mín.</th>
-              <th id="thAccion">Acción</th>
-            </tr>
-          </thead>
-          <tbody id="tablaProductos">
-            <!-- Se carga dinámicamente -->
-          </tbody>
-        </table>
-      </div>
+        <div class="card">
+            <h3>Inventario Actual</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Categoría</th>
+                        <th>Cantidad</th>
+                        <th>Stock Mín.</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProductos">
+                    <!-- Los productos se cargarán aquí automáticamente -->
+                </tbody>
+            </table>
+        </div>
     </div>
-  </main>
 
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.href = 'login.html';
-    }
+    <script>
+        // URL base de tu backend en Render (Limpia y sin duplicar)
+        const API_URL = "https://inventario-backend-mojz.onrender.com";
 
-    // Obtener datos del usuario logueado
-    const usuarioStr = localStorage.getItem('usuario');
-    const usuario = usuarioStr ? JSON.parse(usuarioStr) : { rol: 'ADMIN', nombre: 'Administrador' };
+        // Obtener el token de autenticación guardado en el login
+        const token = localStorage.getItem("token");
 
-    // Pintar los datos en el aside
-    document.getElementById('nombreUsuario').textContent = usuario.nombre || 'Usuario';
-    document.getElementById('rolUsuario').textContent = usuario.rol || 'USER';
-    document.getElementById('avatarLetra').textContent = usuario.nombre ? usuario.nombre.charAt(0).toUpperCase() : 'U';
+        // Función para cargar los productos desde el backend
+        async function cargarProductos() {
+            try {
+                const response = await fetch(`${API_URL}/api/productos`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
 
-    const esAdmin = usuario.rol === 'ADMIN';
+                if (!response.ok) throw new Error("No se pudieron cargar los productos");
 
-    // Configurar menú lateral según el rol
-    const menuLinks = document.getElementById('menuLinks');
-    if (esAdmin) {
-      menuLinks.innerHTML += `<a href="reportes.html" class="menu-item">📊 Reportes</a>`;
-    }
+                const productos = await response.json();
+                const tbody = document.getElementById("tablaProductos");
+                tbody.innerHTML = "";
 
-    // Si NO es admin (es empleado), ocultamos el formulario y adaptamos la vista
-    if (!esAdmin) {
-      document.getElementById('cardFormulario').style.display = 'none';
-      document.querySelector('.content-grid').style.gridTemplateColumns = '1fr';
-    }
+                productos.forEach(prod => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${prod.nombre || ''}</td>
+                        <td>${prod.descripcion || ''}</td>
+                        <td>${prod.categoria || ''}</td>
+                        <td>${prod.cantidad || 0}</td>
+                        <td>${prod.stockMinimo || 0}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
 
-    // Función para obtener y pintar los productos
-    async function cargarProductos() {
-      try {
-        const respuesta = await fetch('https://.https://inventario-backend-mojz.onrender.com/api/productos');
-        const productos = await respuesta.json();
-        const tbody = document.getElementById('tablaProductos');
-        const thAccion = document.getElementById('thAccion');
-
-        if (!esAdmin && thAccion) {
-          thAccion.style.display = 'none';
+            } catch (error) {
+                console.error("Error al cargar productos:", error);
+            }
         }
 
-        if (productos.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="${esAdmin ? 5 : 4}" style="text-align: center; color: #64748b;">No hay productos registrados.</td></tr>`;
-          return;
-        }
+        // Registrar un nuevo producto al enviar el formulario
+        document.getElementById("productForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-        tbody.innerHTML = productos.map(p => `
-          <tr>
-            <td><strong>${p.nombre}</strong></td>
-            <td>${p.categoria}</td>
-            <td>${p.cantidad} ${p.unidadMedida}</td>
-            <td>${p.stockMinimo}</td>
-            ${esAdmin ? `<td><button class="btn-icon-danger" onclick="eliminarProducto('${p._id}')">🗑️</button></td>` : ''}
-          </tr>
-        `).join('');
-      } catch (error) {
-        console.error('Error al cargar productos:', error);
-      }
-    }
+            const nuevoProducto = {
+                nombre: document.getElementById("nombre").value,
+                descripcion: document.getElementById("descripcion").value,
+                categoria: document.getElementById("categoria").value,
+                cantidad: Number(document.getElementById("cantidad").value),
+                stockMinimo: Number(document.getElementById("stockMinimo").value)
+            };
 
-    // Enviar nuevo producto (Solo si es admin y existe el form)
-    const formProducto = document.getElementById('formProducto');
-    if (formProducto && esAdmin) {
-      formProducto.addEventListener('submit', async (e) => {
-        e.preventDefault();
+            try {
+                const response = await fetch(`${API_URL}/api/productos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(nuevoProducto)
+                });
 
-        const nuevoProducto = {
-          nombre: document.getElementById('nombre').value,
-          descripcion: document.getElementById('descripcion').value,
-          categoria: document.getElementById('categoria').value,
-          cantidad: Number(document.getElementById('cantidad').value),
-          unidadMedida: document.getElementById('unidadMedida').value,
-          stockMinimo: Number(document.getElementById('stockMinimo').value)
-        };
-
-        try {
-          const res = await fetch('https://.https://inventario-backend-mojz.onrender.com/api/productos', {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(nuevoProducto)
-          });
-
-          if (res.ok) {
-            formProducto.reset();
-            cargarProductos();
-          } else {
-            alert('Error al registrar el producto');
-          }
-        } catch (error) {
-          console.error('Error:', error);
-        }
-      });
-    }
-
-    // Función para eliminar producto (Solo admin)
-    async function eliminarProducto(id) {
-      if (!confirm('¿Estás seguro de eliminar este producto?')) return;
-
-      try {
-        const res = await fetch(`https://.https://inventario-backend-mojz.onrender.com/api/productos/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
+                if (response.ok) {
+                    alert("¡Producto guardado con éxito!");
+                    document.getElementById("productForm").reset();
+                    cargarProductos(); // Refresca la tabla automáticamente
+                } else {
+                    alert("Error al guardar el producto.");
+                }
+            } catch (error) {
+                console.error("Error de red:", error);
+                alert("No se pudo conectar con el servidor.");
+            }
         });
 
-        if (res.ok) {
-          cargarProductos();
-        } else {
-          alert('No se pudo eliminar el producto');
-        }
-      } catch (error) {
-        console.error('Error al eliminar:', error);
-      }
-    }
+        // Botón de cerrar sesión
+        document.getElementById("btnLogout").addEventListener("click", () => {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+        });
 
-    // Cerrar sesión
-    document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-      localStorage.clear();
-      window.location.href = 'login.html';
-    });
-
-    // Cargar datos al iniciar
-    cargarProductos();
-  </script>
+        // Cargar productos al abrir la página
+        document.addEventListener("DOMContentLoaded", cargarProductos);
+    </script>
 </body>
 </html>
