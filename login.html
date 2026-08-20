@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Sistema de Pedidos</title>
-    <!-- Tus estilos CSS si los tienes -->
+    <title>Iniciar Sesión - Sistema de Inventario</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -83,7 +82,6 @@
     </div>
 
     <script>
-        // URL de tu backend en Render (Conectado correctamente)
         const API_URL = "https://inventario-backend-mojz.onrender.com";
 
         const loginForm = document.getElementById("loginForm");
@@ -109,9 +107,17 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Guarda el token de sesión y redirige al dashboard
+                    // Guarda el token y los datos reales del usuario para mantener la sesión correcta
                     localStorage.setItem("token", data.token);
-                    window.location.href = "index.html"; // Cambia por tu página principal o dashboard
+                    
+                    // Verificamos las propiedades comunes que devuelven los backends para el usuario
+                    const nombreUsuario = data.usuario?.nombre || data.nombre || "Administrador";
+                    const rolUsuario = data.usuario?.rol || data.rol || "ADMIN";
+
+                    localStorage.setItem("nombreUsuario", nombreUsuario);
+                    localStorage.setItem("rolUsuario", rolUsuario);
+                    
+                    window.location.href = "index.html";
                 } else {
                     errorAlert.textContent = data.message || "Correo o contraseña incorrectos.";
                 }
@@ -122,6 +128,5 @@
             }
         });
     </script>
-
 </body>
 </html>

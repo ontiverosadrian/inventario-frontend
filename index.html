@@ -70,6 +70,18 @@
             padding: 2px 6px;
             border-radius: 4px;
         }
+        .btn-logout {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 5px;
+            padding: 0;
+        }
+        .btn-logout:hover {
+            text-decoration: underline;
+        }
         
         /* Contenido principal en dos columnas */
         .main-content {
@@ -81,9 +93,6 @@
             font-size: 20px;
             color: #1e293b;
             margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         .content-grid {
             display: flex;
@@ -175,10 +184,11 @@
             </nav>
         </div>
         <div class="user-info">
-            <div class="user-avatar">A</div>
+            <div class="user-avatar" id="userAvatar">A</div>
             <div class="user-details">
-                <p><strong>Administrador</strong></p>
-                <span class="user-tag">ADMIN</span>
+                <p><strong id="userName">Administrador</strong></p>
+                <span class="user-tag" id="userTag">ADMIN</span>
+                <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
             </div>
         </div>
     </div>
@@ -247,6 +257,24 @@
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
+
+        // Cargar datos del usuario guardados en el Login
+        document.addEventListener("DOMContentLoaded", () => {
+            const nombre = localStorage.getItem("nombreUsuario") || "Administrador";
+            const rol = localStorage.getItem("rolUsuario") || "ADMIN";
+
+            document.getElementById("userName").textContent = nombre;
+            document.getElementById("userTag").textContent = rol;
+            document.getElementById("userAvatar").textContent = nombre.charAt(0).toUpperCase();
+
+            cargarProductos();
+        });
+
+        // Botón cerrar sesión
+        document.getElementById("btnLogout").addEventListener("click", () => {
+            localStorage.clear();
+            window.location.href = "login.html";
+        });
 
         async function cargarProductos() {
             try {
@@ -320,8 +348,6 @@
                 alert("No se pudo conectar con el servidor.");
             }
         });
-
-        document.addEventListener("DOMContentLoaded", cargarProductos);
     </script>
 </body>
 </html>
