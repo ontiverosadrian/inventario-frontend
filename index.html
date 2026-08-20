@@ -177,10 +177,8 @@
     <div class="sidebar">
         <div>
             <h2>📦 Sistema Inventario</h2>
-            <nav>
-                <a href="index.html" class="active">Productos</a>
-                <a href="solicitudes.html">Solicitudes</a>
-                <a href="reportes.html">Reportes</a>
+            <nav id="sidebarNav">
+                <!-- Se llena dinámicamente según el rol -->
             </nav>
         </div>
         <div class="user-info">
@@ -257,20 +255,32 @@
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
+        const rolUsuario = localStorage.getItem("rolUsuario") || "USER";
 
-        // Cargar datos del usuario guardados en el Login
+        // Protección de ruta: Si no es admin, fuera de aquí
+        if (rolUsuario !== "ADMIN") {
+            alert("Acceso denegado. Sección exclusiva para administradores.");
+            window.location.href = "solicitudes.html";
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             const nombre = localStorage.getItem("nombreUsuario") || "Administrador";
-            const rol = localStorage.getItem("rolUsuario") || "ADMIN";
 
             document.getElementById("userName").textContent = nombre;
-            document.getElementById("userTag").textContent = rol;
+            document.getElementById("userTag").textContent = rolUsuario;
             document.getElementById("userAvatar").textContent = nombre.charAt(0).toUpperCase();
+
+            // Renderizar menú exclusivo de Administrador
+            const nav = document.getElementById("sidebarNav");
+            nav.innerHTML = `
+                <a href="index.html" class="active">Productos</a>
+                <a href="solicitudes.html">Solicitudes</a>
+                <a href="reportes.html">Reportes</a>
+            `;
 
             cargarProductos();
         });
 
-        // Botón cerrar sesión
         document.getElementById("btnLogout").addEventListener("click", () => {
             localStorage.clear();
             window.location.href = "login.html";

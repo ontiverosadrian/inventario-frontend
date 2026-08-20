@@ -180,17 +180,15 @@
     <div class="sidebar">
         <div>
             <h2>📦 Sistema Inventario</h2>
-            <nav>
-                <a href="index.html">Productos</a>
-                <a href="solicitudes.html" class="active">Solicitudes</a>
-                <a href="reportes.html">Reportes</a>
+            <nav id="sidebarNav">
+                <!-- Se llena dinámicamente según el rol -->
             </nav>
         </div>
         <div class="user-info">
-            <div class="user-avatar" id="userAvatar">A</div>
+            <div class="user-avatar" id="userAvatar">U</div>
             <div class="user-details">
-                <p><strong id="userName">Administrador</strong></p>
-                <span class="user-tag" id="userTag">ADMIN</span>
+                <p><strong id="userName">Usuario</strong></p>
+                <span class="user-tag" id="userTag">USER</span>
                 <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
             </div>
         </div>
@@ -251,19 +249,32 @@
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
 
-        // Cargar datos de la sesión activa al abrir la página
         document.addEventListener("DOMContentLoaded", () => {
-            const nombre = localStorage.getItem("nombreUsuario") || "Administrador";
-            const rol = localStorage.getItem("rolUsuario") || "ADMIN";
+            const nombre = localStorage.getItem("nombreUsuario") || "Usuario";
+            const rol = localStorage.getItem("rolUsuario") || "USER";
 
             document.getElementById("userName").textContent = nombre;
             document.getElementById("userTag").textContent = rol;
             document.getElementById("userAvatar").textContent = nombre.charAt(0).toUpperCase();
 
+            // Configurar el menú lateral según el rol
+            const nav = document.getElementById("sidebarNav");
+            if (rol === "ADMIN") {
+                nav.innerHTML = `
+                    <a href="index.html">Productos</a>
+                    <a href="solicitudes.html" class="active">Solicitudes</a>
+                    <a href="reportes.html">Reportes</a>
+                `;
+            } else {
+                // Si es empleado, SOLO ve solicitudes y se le oculta productos/reportes
+                nav.innerHTML = `
+                    <a href="solicitudes.html" class="active">Solicitudes</a>
+                `;
+            }
+
             cargarSolicitudes();
         });
 
-        // Botón cerrar sesión
         document.getElementById("btnLogout").addEventListener("click", () => {
             localStorage.clear();
             window.location.href = "login.html";
