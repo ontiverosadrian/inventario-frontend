@@ -204,16 +204,19 @@
         <h2 class="page-title">📋 Gestión de Solicitudes</h2>
 
         <div class="content-grid">
+            <!-- Formulario conectado a productos -->
             <div class="card-form">
-                <h3>Nueva Solicitud</h3>
+                <h3>Nueva Solicitud de Producto</h3>
                 <form id="solicitudForm">
                     <div class="form-group">
-                        <label>Título / Motivo</label>
-                        <input type="text" id="titulo" required placeholder="Ej. Solicitud de material">
+                        <label>Seleccionar Producto</label>
+                        <select id="productoSelect" required>
+                            <option value="">Cargando productos...</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>Descripción</label>
-                        <textarea id="descripcion" placeholder="Detalles de la solicitud..."></textarea>
+                        <label>Cantidad Solicitada</label>
+                        <input type="number" id="cantidad" min="1" required placeholder="Ej. 5">
                     </div>
                     <div class="form-group">
                         <label>Prioridad</label>
@@ -223,16 +226,22 @@
                             <option value="Alta">Alta</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Observaciones / Motivo</label>
+                        <textarea id="descripcion" placeholder="Detalles de la solicitud..."></textarea>
+                    </div>
                     <button type="submit" class="btn-primary">Crear Solicitud</button>
                 </form>
             </div>
 
+            <!-- Tabla de Solicitudes -->
             <div class="card-table">
                 <h3>Solicitudes Registradas</h3>
                 <table>
                     <thead>
                         <tr>
-                            <th>Título</th>
+                            <th>Producto</th>
+                            <th>Cant.</th>
                             <th>Prioridad</th>
                             <th>Estado</th>
                             <th id="thAccionSolicitud">Acción</th>
@@ -240,7 +249,7 @@
                     </thead>
                     <tbody id="tablaSolicitudes">
                         <tr>
-                            <td colspan="4" class="no-data">No hay solicitudes registradas.</td>
+                            <td colspan="5" class="no-data">No hay solicitudes registradas.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -272,6 +281,7 @@
                 `;
             }
 
+            cargarProductosEnSelect();
             cargarSolicitudes();
         });
 
@@ -279,6 +289,40 @@
             localStorage.clear();
             window.location.href = "login.html";
         });
+
+        // Cargar los productos existentes en el menú desplegable del formulario
+        async function cargarProductosEnSelect() {
+            try {
+                const response = await fetch(`${API_URL}/api/productos`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) return;
+
+                const productos = await response.json();
+                const select = document.getElementById("productoSelect");
+
+                if (productos.length === 0) {
+                    select.innerHTML = `<option value="">No hay productos disponibles</option>`;
+                    return;
+                }
+
+                select.innerHTML = `<option value="">Selecciona un producto...</option>`;
+                productos.forEach(prod => {
+                    const option = document.createElement("option");
+                    // Guardamos el ID del producto y mostramos su nombre y stock actual
+                    option.value = prod._id || prod.id;
+                    option.textContent = `${prod.nombre} (Stock: ${prod.cantidad} ${prod.unidadMedida || ''})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error al cargar productos para el select:", error);
+            }
+        }
 
         async function cargarSolicitudes() {
             try {
@@ -296,7 +340,7 @@
                 const tbody = document.getElementById("tablaSolicitudes");
                 
                 if (solicitudes.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="no-data">No hay solicitudes registradas.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" class="no-data">No hay solicitudes registradas.</td></tr>`;
                     return;
                 }
 
@@ -304,13 +348,17 @@
                 solicitudes.forEach(sol => {
                     const tr = document.createElement("tr");
                     
-                    // Si es Admin ve el botón de eliminar, si es empleado ve un guion o celda vacía
                     let columnaAccion = rolUsuario === "ADMIN" 
                         ? `<td><button class="btn-danger" onclick="eliminarSolicitud('${sol._id || sol.id}')">Eliminar</button></td>`
                         : `<td>-</td>`;
 
+                    // Si el backend popula el producto, podemos mostrar su nombre, si viene el ID directo mostramos un texto genérico o el dato asociado
+                    const nombreProducto = sol.producto?.nombre || sol.titulo || 'Producto';
+                    const cantidadSolicitada = sol.cantidad || 1;
+
                     tr.innerHTML = `
-                        <td>${sol.titulo || ''}</td>
+                        <td>${nombreProducto}</td>
+                        <td>${cantidadSolicitada}</td>
                         <td>${sol.prioridad || ''}</td>
                         <td>${sol.estado || 'Pendiente'}</td>
                         ${columnaAccion}
@@ -321,6 +369,40 @@
                 console.error("Error al cargar solicitudes:", error);
             }
         }
+
+        document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const nuevaSolicitud = {
+                producto: document.getElementById("productoSelect").value, // ID del producto seleccionado
+                titulo: document.getElementById("productoSelect").options[document.getElementById("productoSelect").selectedIndex].text,
+                cantidad: Number(document.getElementById("cantidad").value),
+                prioridad: document.getElementById("prioridad").value,
+                descripcion: document.getElementById("descripcion").value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/solicitudes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(nuevaSolicitud)
+                });
+
+                if (response.ok) {
+                    alert("¡Solicitud creada con éxito!");
+                    document.getElementById("solicitudForm").reset();
+                    cargarSolicitudes();
+                } else {
+                    alert("Error al crear la solicitud.");
+                }
+            } catch (error) {
+                console.error("Error de red:", error);
+                alert("No se pudo conectar con el servidor.");
+            }
+        });
 
         async function eliminarSolicitud(id) {
             if (rolUsuario !== "ADMIN") {
@@ -349,38 +431,6 @@
                 alert("No se pudo conectar con el servidor.");
             }
         }
-
-        document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const nuevaSolicitud = {
-                titulo: document.getElementById("titulo").value,
-                descripcion: document.getElementById("descripcion").value,
-                prioridad: document.getElementById("prioridad").value
-            };
-
-            try {
-                const response = await fetch(`${API_URL}/api/solicitudes`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(nuevaSolicitud)
-                });
-
-                if (response.ok) {
-                    alert("¡Solicitud creada con éxito!");
-                    document.getElementById("solicitudForm").reset();
-                    cargarSolicitudes();
-                } else {
-                    alert("Error al crear la solicitud.");
-                }
-            } catch (error) {
-                console.error("Error de red:", error);
-                alert("No se pudo conectar con el servidor.");
-            }
-        });
     </script>
 </body>
 </html>
