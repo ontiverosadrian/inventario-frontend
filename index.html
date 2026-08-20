@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Inventario - Dashboard</title>
+    <title>Sistema de Inventario - Productos</title>
     <style>
         * {
             margin: 0;
@@ -46,57 +46,84 @@
         .user-info {
             border-top: 1px solid #334155;
             padding-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .btn-logout {
-            width: 100%;
-            padding: 8px;
-            background-color: #dc2626;
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background-color: #2563eb;
             color: white;
-            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .user-details p {
+            font-size: 14px;
+        }
+        .user-tag {
+            font-size: 10px;
+            background-color: #1d4ed8;
+            padding: 2px 6px;
             border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
         }
-        .btn-logout:hover {
-            background-color: #b91c1c;
-        }
-        /* Contenido principal */
+        
+        /* Contenido principal en dos columnas */
         .main-content {
             flex: 1;
             padding: 30px;
             overflow-y: auto;
         }
-        .card {
+        .page-title {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .content-grid {
+            display: flex;
+            gap: 25px;
+        }
+        .card-form {
+            width: 380px;
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            height: fit-content;
         }
-        .card h3 {
-            margin-bottom: 15px;
+        .card-table {
+            flex: 1;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .card-form h3, .card-table h3 {
+            margin-bottom: 20px;
             color: #1e293b;
+            font-size: 16px;
         }
         .form-group {
-            margin-bottom: 15px;
-        }
-        .form-row {
-            display: flex;
-            gap: 15px;
-        }
-        .form-row .form-group {
-            flex: 1;
+            margin-bottom: 12px;
         }
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             color: #475569;
+            font-size: 13px;
         }
         .form-group input, .form-group select {
             width: 100%;
-            padding: 10px;
+            padding: 9px;
             border: 1px solid #cbd5e1;
             border-radius: 4px;
+            font-size: 14px;
         }
         .btn-primary {
             background-color: #2563eb;
@@ -105,8 +132,10 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             width: 100%;
+            font-weight: bold;
+            margin-top: 5px;
         }
         .btn-primary:hover {
             background-color: #1d4ed8;
@@ -117,13 +146,19 @@
             margin-top: 10px;
         }
         table th, table td {
-            padding: 10px;
+            padding: 12px 10px;
             border-bottom: 1px solid #e2e8f0;
             text-align: left;
+            font-size: 13px;
         }
         table th {
-            background-color: #f8fafc;
-            color: #475569;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .no-data {
+            text-align: center;
+            color: #94a3b8;
+            padding: 30px;
         }
     </style>
 </head>
@@ -140,30 +175,35 @@
             </nav>
         </div>
         <div class="user-info">
-            <p><strong>Administrador</strong></p>
-            <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
+            <div class="user-avatar">A</div>
+            <div class="user-details">
+                <p><strong>Administrador</strong></p>
+                <span class="user-tag">ADMIN</span>
+            </div>
         </div>
     </div>
 
-    <!-- Contenido -->
+    <!-- Contenido Principal -->
     <div class="main-content">
-        <div class="card">
-            <h3>Gestión de Productos</h3>
-            <h4 style="margin-bottom: 15px; color: #64748b; font-size: 14px;">Registrar Nuevo Producto</h4>
-            <form id="productForm">
-                <div class="form-group">
-                    <label>Nombre del Producto</label>
-                    <input type="text" id="nombre" required placeholder="Ej. Monitor gamer">
-                </div>
-                <div class="form-group">
-                    <label>Descripción</label>
-                    <input type="text" id="descripcion" placeholder="Ej. Monitor alta gama">
-                </div>
-                <div class="form-group">
-                    <label>Categoría</label>
-                    <input type="text" id="categoria" placeholder="Ej. Electrónica">
-                </div>
-                <div class="form-row">
+        <h2 class="page-title">📦 Gestión de Productos</h2>
+
+        <div class="content-grid">
+            <!-- Formulario Izquierda -->
+            <div class="card-form">
+                <h3>Registrar Nuevo Producto</h3>
+                <form id="productForm">
+                    <div class="form-group">
+                        <label>Nombre del Producto</label>
+                        <input type="text" id="nombre" required placeholder="Ej. Monitor gamer">
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" id="descripcion" placeholder="Ej. Monitor alta gama">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <input type="text" id="categoria" placeholder="Ej. Electrónica">
+                    </div>
                     <div class="form-group">
                         <label>Cantidad</label>
                         <input type="number" id="cantidad" required placeholder="10">
@@ -172,43 +212,42 @@
                         <label>Unidad de Medida</label>
                         <input type="text" id="unidadMedida" required placeholder="Piezas">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Stock Mínimo</label>
-                    <input type="number" id="stockMinimo" required placeholder="2">
-                </div>
-                <button type="submit" class="btn-primary">Guardar Producto</button>
-            </form>
-        </div>
+                    <div class="form-group">
+                        <label>Stock Mínimo</label>
+                        <input type="number" id="stockMinimo" required placeholder="2">
+                    </div>
+                    <button type="submit" class="btn-primary">Guardar Producto</button>
+                </form>
+            </div>
 
-        <div class="card">
-            <h3>Inventario Actual</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Categoría</th>
-                        <th>Cantidad</th>
-                        <th>Unidad</th>
-                        <th>Stock Mín.</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaProductos">
-                    <!-- Los productos se cargarán aquí automáticamente -->
-                </tbody>
-            </table>
+            <!-- Tabla Derecha -->
+            <div class="card-table">
+                <h3>Inventario Actual</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Categoría</th>
+                            <th>Cant.</th>
+                            <th>Unidad</th>
+                            <th>Stock Mín.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaProductos">
+                        <tr>
+                            <td colspan="6" class="no-data">No hay productos registrados.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        // URL base de tu backend en Render
         const API_URL = "https://inventario-backend-mojz.onrender.com";
-
-        // Obtener el token de autenticación
         const token = localStorage.getItem("token");
 
-        // Función para cargar los productos desde el backend
         async function cargarProductos() {
             try {
                 const response = await fetch(`${API_URL}/api/productos`, {
@@ -219,12 +258,17 @@
                     }
                 });
 
-                if (!response.ok) throw new Error("No se pudieron cargar los productos");
+                if (!response.ok) return;
 
                 const productos = await response.json();
                 const tbody = document.getElementById("tablaProductos");
-                tbody.innerHTML = "";
 
+                if (productos.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="no-data">No hay productos registrados.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = "";
                 productos.forEach(prod => {
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
@@ -237,13 +281,11 @@
                     `;
                     tbody.appendChild(tr);
                 });
-
             } catch (error) {
                 console.error("Error al cargar productos:", error);
             }
         }
 
-        // Registrar un nuevo producto al enviar el formulario
         document.getElementById("productForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -252,7 +294,7 @@
                 descripcion: document.getElementById("descripcion").value,
                 categoria: document.getElementById("categoria").value,
                 cantidad: Number(document.getElementById("cantidad").value),
-                unidadMedida: document.getElementById("unidadMedida").value, // Incluido correctamente
+                unidadMedida: document.getElementById("unidadMedida").value,
                 stockMinimo: Number(document.getElementById("stockMinimo").value)
             };
 
@@ -266,14 +308,12 @@
                     body: JSON.stringify(nuevoProducto)
                 });
 
-                const data = await response.json();
-
                 if (response.ok) {
                     alert("¡Producto guardado con éxito!");
                     document.getElementById("productForm").reset();
-                    cargarProductos(); // Refresca la tabla automáticamente
+                    cargarProductos();
                 } else {
-                    alert("Error: " + (data.error || data.mensaje || "No se pudo guardar"));
+                    alert("Error al guardar el producto.");
                 }
             } catch (error) {
                 console.error("Error de red:", error);
@@ -281,13 +321,6 @@
             }
         });
 
-        // Botón de cerrar sesión
-        document.getElementById("btnLogout").addEventListener("click", () => {
-            localStorage.removeItem("token");
-            window.location.href = "login.html";
-        });
-
-        // Cargar productos al abrir la página
         document.addEventListener("DOMContentLoaded", cargarProductos);
     </script>
 </body>
