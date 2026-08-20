@@ -323,10 +323,10 @@
             }
         }
 
-        // Cargar solicitudes usando la ruta corregida en singular (/api/solicitud)
+        // Cargar solicitudes usando la ruta correcta en plural (/api/solicitudes)
         async function cargarSolicitudes() {
             try {
-                const response = await fetch(`${API_URL}/api/solicitud`, {
+                const response = await fetch(`${API_URL}/api/solicitudes`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -369,7 +369,7 @@
             }
         }
 
-        // Enviar nueva solicitud a /api/solicitud
+        // Enviar nueva solicitud a /api/solicitudes
         document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -383,7 +383,7 @@
             };
 
             try {
-                const response = await fetch(`${API_URL}/api/solicitud`, {
+                const response = await fetch(`${API_URL}/api/solicitudes`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -405,7 +405,7 @@
             }
         });
 
-        // Eliminar solicitud usando /api/solicitud
+        // Eliminar solicitud usando /api/solicitudes
         async function eliminarSolicitud(id) {
             if (rolUsuario !== "ADMIN") {
                 alert("No tienes permisos para realizar esta acción.");
@@ -415,7 +415,7 @@
             if (!confirm("¿Estás seguro de eliminar esta solicitud?")) return;
 
             try {
-                const response = await fetch(`${API_URL}/api/solicitud/${id}`, {
+                const response = await fetch(`${API_URL}/api/solicitudes/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
