@@ -290,7 +290,7 @@
             window.location.href = "login.html";
         });
 
-        // Cargar los productos existentes en el menú desplegable del formulario
+        // Cargar los productos existentes en el menú desplegable
         async function cargarProductosEnSelect() {
             try {
                 const response = await fetch(`${API_URL}/api/productos`, {
@@ -314,7 +314,6 @@
                 select.innerHTML = `<option value="">Selecciona un producto...</option>`;
                 productos.forEach(prod => {
                     const option = document.createElement("option");
-                    // Guardamos el ID del producto y mostramos su nombre y stock actual
                     option.value = prod._id || prod.id;
                     option.textContent = `${prod.nombre} (Stock: ${prod.cantidad} ${prod.unidadMedida || ''})`;
                     select.appendChild(option);
@@ -324,9 +323,10 @@
             }
         }
 
+        // Cargar solicitudes usando la ruta corregida en singular (/api/solicitud)
         async function cargarSolicitudes() {
             try {
-                const response = await fetch(`${API_URL}/api/solicitudes`, {
+                const response = await fetch(`${API_URL}/api/solicitud`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -352,7 +352,6 @@
                         ? `<td><button class="btn-danger" onclick="eliminarSolicitud('${sol._id || sol.id}')">Eliminar</button></td>`
                         : `<td>-</td>`;
 
-                    // Si el backend popula el producto, podemos mostrar su nombre, si viene el ID directo mostramos un texto genérico o el dato asociado
                     const nombreProducto = sol.producto?.nombre || sol.titulo || 'Producto';
                     const cantidadSolicitada = sol.cantidad || 1;
 
@@ -370,19 +369,21 @@
             }
         }
 
+        // Enviar nueva solicitud a /api/solicitud
         document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
+            const selectProd = document.getElementById("productoSelect");
             const nuevaSolicitud = {
-                producto: document.getElementById("productoSelect").value, // ID del producto seleccionado
-                titulo: document.getElementById("productoSelect").options[document.getElementById("productoSelect").selectedIndex].text,
+                producto: selectProd.value,
+                titulo: selectProd.options[selectProd.selectedIndex].text,
                 cantidad: Number(document.getElementById("cantidad").value),
                 prioridad: document.getElementById("prioridad").value,
                 descripcion: document.getElementById("descripcion").value
             };
 
             try {
-                const response = await fetch(`${API_URL}/api/solicitudes`, {
+                const response = await fetch(`${API_URL}/api/solicitud`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -404,6 +405,7 @@
             }
         });
 
+        // Eliminar solicitud usando /api/solicitud
         async function eliminarSolicitud(id) {
             if (rolUsuario !== "ADMIN") {
                 alert("No tienes permisos para realizar esta acción.");
@@ -413,7 +415,7 @@
             if (!confirm("¿Estás seguro de eliminar esta solicitud?")) return;
 
             try {
-                const response = await fetch(`${API_URL}/api/solicitudes/${id}`, {
+                const response = await fetch(`${API_URL}/api/solicitud/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
