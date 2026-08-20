@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Inventario - Solicitudes</title>
+  <style>
+    :root {
+      --sidebar-bg: #1e293b;
+      --sidebar-hover: #334155;
+      --sidebar-text: #94a3b8;
+      --sidebar-text-active: #ffffff;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Barra Lateral */
+    aside {
+      width: 240px;
+      background-color: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 15px;
+      color: white;
+    }
+
+    .brand {
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 25px;
+      padding-left: 10px;
+    }
+
+    .menu-links {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex-grow: 1;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background-color: var(--sidebar-hover);
+      color: var(--sidebar-text-active);
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid #334155;
+      padding-top: 15px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-left: 5px;
+    }
+
+    .user-avatar {
+      width: 32px; height: 32px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; color: white; font-size: 13px;
+    }
+
+    .user-name { font-size: 13px; font-weight: bold; color: white; display: block; }
+    .user-role { font-size: 10px; background: var(--primary-color); color: white; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
+
+    .btn-salir {
+      width: 100%; background: transparent; color: #f87171; border: 1px solid #f87171;
+      padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px;
+      display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-salir:hover { background-color: var(--danger); color: white; border-color: var(--danger); }
+
+    /* Contenido Principal */
+    main { flex-grow: 1; padding: 30px; overflow-y: auto; }
+    .main-header { font-size: 20px; font-weight: bold; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
+
+    .content-grid { display: grid; grid-template-columns: 380px 1fr; gap: 25px; }
+    @media (max-width: 1000px) { .content-grid { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); height: fit-content; }
+    .card h2 { margin-top: 0; font-size: 16px; margin-bottom: 20px; font-weight: bold; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: #fff; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); }
+
+    .btn-primary { width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 11px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 5px; }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th { color: var(--text-muted); font-weight: 600; padding: 10px; border-bottom: 1px solid var(--border-color); }
+    td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); }
+
+    .btn-icon-danger { background: transparent; border: 1px solid #fecaca; color: var(--danger); padding: 5px 8px; border-radius: 6px; cursor: pointer; }
+    .btn-icon-danger:hover { background: var(--danger); color: white; }
+  </style>
+</head>
+<body>
+
+  <!-- Barra lateral -->
+  <aside>
+    <div>
+      <div class="brand"><span>📦</span> Sistema Inventario</div>
+      <div class="menu-links" id="menuLinks">
+        <a href="index.html" class="menu-item">📦 Productos</a>
+        <a href="solicitudes.html" class="menu-item active">📋 Solicitudes</a>
+        <!-- Reportes se agrega dinámicamente si es admin -->
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="avatarLetra">U</div>
+        <div class="user-details">
+          <span class="user-name" id="nombreUsuario">Usuario</span>
+          <span class="user-role" id="rolUsuario">USER</span>
+        </div>
+      </div>
+      <button class="btn-salir" id="btnCerrarSesion">🚪 Cerrar Sesión</button>
+    </div>
+  </aside>
+
+  <!-- Panel principal de Solicitudes -->
+  <main>
+    <div class="main-header">
+      <span>📋 Gestión de Solicitudes</span>
+    </div>
+
+    <div class="content-grid">
+      <!-- Formulario para registrar solicitud -->
+      <div class="card">
+        <h2>Nueva Solicitud</h2>
+        <form id="formSolicitud">
+          <div class="form-group">
+            <label>Título / Motivo</label>
+            <input type="text" id="titulo" required placeholder="Ej. Solicitud de material">
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea id="descripcion" rows="3" placeholder="Detalles de la solicitud..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Prioridad</label>
+            <select id="prioridad">
+              <option value="Baja">Baja</option>
+              <option value="Media" selected>Media</option>
+              <option value="Alta">Alta</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-primary">Crear Solicitud</button>
+        </form>
+      </div>
+
+      <!-- Tabla de solicitudes -->
+      <div class="card">
+        <h2>Solicitudes Registradas</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Prioridad</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaSolicitudes">
+            <tr><td colspan="4" style="text-align: center; color: #64748b;">No hay solicitudes registradas.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    // Obtener datos reales del usuario desde el localStorage
+    const usuarioStr = localStorage.getItem('usuario');
+    const usuario = usuarioStr ? JSON.parse(usuarioStr) : { rol: 'USER', nombre: 'Usuario' };
+
+    // Pintar correctamente los datos en la barra lateral
+    document.getElementById('nombreUsuario').textContent = usuario.nombre || 'Usuario';
+    document.getElementById('rolUsuario').textContent = usuario.rol || 'USER';
+    document.getElementById('avatarLetra').textContent = usuario.nombre ? usuario.nombre.charAt(0).toUpperCase() : 'U';
+
+    const esAdmin = usuario.rol === 'ADMIN';
+
+    // Mostrar el enlace de reportes solo si es administrador
+    const menuLinks = document.getElementById('menuLinks');
+    if (esAdmin) {
+      menuLinks.innerHTML += `<a href="reportes.html" class="menu-item">📊 Reportes</a>`;
+    }
+
+    // Lógica para cerrar sesión
+    document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

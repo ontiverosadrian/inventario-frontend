@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos - Admin</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f9; }
+        header { background: #333; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 5px; }
+        nav a { color: #fff; text-decoration: none; margin-right: 15px; font-weight: bold; }
+        .container { margin-top: 30px; }
+        .card { background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Panel de Administración</h1>
+        <nav>
+            <a href="index.html">Inicio</a>
+            <a href="productos.html">Productos</a>
+            <a href="reportes.html">Reportes</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Gestión de Productos</h2>
+            <p>Aquí puedes agregar, editar o ver el stock de los productos.</p>
+        </div>
+    </div>
+
+    <!-- Script de seguridad para proteger la página -->
+    <script>
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        
+        // Si no hay sesión o el usuario NO es ADMIN, lo sacamos de aquí
+        if (!usuario || usuario.rol !== 'ADMIN') {
+            alert("Acceso denegado. Esta sección es exclusiva para administradores.");
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
