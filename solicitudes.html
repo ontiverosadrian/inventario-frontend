@@ -5,254 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Inventario - Solicitudes</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        body {
-            display: flex;
-            background-color: #f4f6f9;
-            height: 100vh;
-        }
-        .sidebar {
-            width: 250px;
-            background-color: #1e293b;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 20px;
-        }
-        .sidebar h2 {
-            font-size: 18px;
-            margin-bottom: 30px;
-        }
-        .sidebar nav a {
-            display: block;
-            color: #94a3b8;
-            text-decoration: none;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            transition: 0.3s;
-        }
-        .sidebar nav a:hover, .sidebar nav a.active {
-            background-color: #334155;
-            color: white;
-        }
-        .user-info {
-            border-top: 1px solid #334155;
-            padding-top: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            background-color: #2563eb;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-        .user-details p {
-            font-size: 14px;
-        }
-        .user-tag {
-            font-size: 10px;
-            background-color: #1d4ed8;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-        .btn-logout {
-            background: none;
-            border: none;
-            color: #ef4444;
-            font-size: 12px;
-            cursor: pointer;
-            margin-top: 5px;
-            padding: 0;
-        }
-        .btn-logout:hover {
-            text-decoration: underline;
-        }
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-        }
-        .page-title {
-            font-size: 20px;
-            color: #1e293b;
-            margin-bottom: 25px;
-        }
-        .content-grid {
-            display: flex;
-            gap: 25px;
-        }
-        .card-form {
-            width: 400px;
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            height: fit-content;
-        }
-        .card-table {
-            flex: 1;
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .card-form h3, .card-table h3 {
-            margin-bottom: 20px;
-            color: #1e293b;
-            font-size: 16px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #475569;
-            font-size: 14px;
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .form-group textarea {
-            resize: vertical;
-            height: 90px;
-        }
-        .btn-primary {
-            background-color: #2563eb;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 15px;
-            width: 100%;
-            font-weight: bold;
-        }
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-        }
-        .btn-danger {
-            background-color: #dc2626;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .btn-danger:hover {
-            background-color: #b91c1c;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        table th, table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #e2e8f0;
-            text-align: left;
-            font-size: 14px;
-        }
-        table th {
-            color: #64748b;
-            font-weight: 600;
-        }
-        .no-data {
-            text-align: center;
-            color: #94a3b8;
-            padding: 30px;
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
+        
+        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; }
+        .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
+        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
+        .sidebar nav a.active { background-color: #334155; color: white; }
+        
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .content-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #475569; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
+        .form-group textarea { resize: vertical; height: 80px; }
+        
+        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-danger { background-color: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        
+        .table-container { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
+        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+        th { color: #64748b; font-weight: 600; }
+        
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
         }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div>
-            <h2>📦 Sistema Inventario</h2>
-            <nav id="sidebarNav"></nav>
-        </div>
-        <div class="user-info">
-            <div class="user-avatar" id="userAvatar">U</div>
-            <div class="user-details">
-                <p><strong id="userName">Usuario</strong></p>
-                <span class="user-tag" id="userTag">USER</span>
-                <button class="btn-logout" id="btnLogout">Cerrar Sesión</button>
-            </div>
-        </div>
+        <h2>📦 Inventario</h2>
+        <nav>
+            <a href="index.html">Productos</a>
+            <a href="solicitudes.html" class="active">Solicitudes</a>
+            <a href="reportes.html">Reportes</a>
+        </nav>
     </div>
 
     <div class="main-content">
-        <h2 class="page-title">📋 Gestión de Solicitudes</h2>
-
+        <h1>📋 Gestión de Solicitudes</h1>
+        <br>
         <div class="content-grid">
-            <!-- Formulario de Solicitud -->
-            <div class="card-form">
-                <h3>Nueva Solicitud de Producto</h3>
+            <!-- Formulario -->
+            <div class="card">
+                <h3>Nueva Solicitud</h3>
                 <form id="solicitudForm">
                     <div class="form-group">
-                        <label>Seleccionar Producto</label>
+                        <label>Producto</label>
                         <select id="productoSelect" required>
                             <option value="">Cargando productos...</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Cantidad Solicitada</label>
-                        <input type="number" id="cantidad" min="1" required placeholder="Ej. 5">
+                        <label>Cantidad</label>
+                        <input type="number" id="cantidad" min="1" required placeholder="Ej. 2">
                     </div>
                     <div class="form-group">
-                        <label>Prioridad</label>
-                        <select id="prioridad">
-                            <option value="Baja">Baja</option>
-                            <option value="Media" selected>Media</option>
-                            <option value="Alta">Alta</option>
-                        </select>
+                        <label>Nombre del Solicitante</label>
+                        <input type="text" id="solicitante" required placeholder="Ej. Juan Pérez">
                     </div>
                     <div class="form-group">
-                        <label>Observaciones / Motivo</label>
-                        <textarea id="descripcion" placeholder="Detalles de la solicitud..."></textarea>
+                        <label>Observaciones</label>
+                        <textarea id="descripcion" placeholder="Detalles..."></textarea>
                     </div>
                     <button type="submit" class="btn-primary">Crear Solicitud</button>
                 </form>
             </div>
 
-            <!-- Tabla de Solicitudes -->
-            <div class="card-table">
+            <!-- Tabla -->
+            <div class="card">
                 <h3>Solicitudes Registradas</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Cant.</th>
-                            <th>Prioridad</th>
-                            <th>Estado</th>
-                            <th id="thAccionSolicitud">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaSolicitudes">
-                        <tr>
-                            <td colspan="5" class="no-data">No hay solicitudes registradas.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cant.</th>
+                                <th>Solicitante</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaSolicitudes">
+                            <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -263,207 +108,106 @@
         const rolUsuario = localStorage.getItem("rolUsuario") || "USER";
 
         document.addEventListener("DOMContentLoaded", () => {
-            const nombre = localStorage.getItem("nombreUsuario") || "Usuario";
-            document.getElementById("userName").textContent = nombre;
-            document.getElementById("userTag").textContent = rolUsuario;
-            document.getElementById("userAvatar").textContent = nombre.charAt(0).toUpperCase();
-
-            const nav = document.getElementById("sidebarNav");
-            if (rolUsuario === "ADMIN") {
-                nav.innerHTML = `
-                    <a href="index.html">Productos</a>
-                    <a href="solicitudes.html" class="active">Solicitudes</a>
-                    <a href="reportes.html">Reportes</a>
-                `;
-            } else {
-                nav.innerHTML = `
-                    <a href="solicitudes.html" class="active">Solicitudes</a>
-                `;
-            }
-
             cargarProductosEnSelect();
             cargarSolicitudes();
         });
 
-        document.getElementById("btnLogout").addEventListener("click", () => {
-            localStorage.clear();
-            window.location.href = "login.html";
-        });
-
         async function cargarProductosEnSelect() {
             try {
-                const response = await fetch(`${API_URL}/api/productos`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) return;
-
-                const productos = await response.json();
+                const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const productos = await res.json();
                 const select = document.getElementById("productoSelect");
-
-                if (productos.length === 0) {
-                    select.innerHTML = `<option value="">No hay productos disponibles</option>`;
-                    return;
-                }
-
                 select.innerHTML = `<option value="">Selecciona un producto...</option>`;
-                productos.forEach(prod => {
-                    const option = document.createElement("option");
-                    option.value = prod._id || prod.id;
-                    option.textContent = `${prod.nombre} (Stock: ${prod.cantidad} ${prod.unidadMedida || ''})`;
-                    select.appendChild(option);
+                productos.forEach(p => {
+                    select.innerHTML += `<option value="${p._id}">${p.nombre} (Stock: ${p.cantidad})</option>`;
                 });
-            } catch (error) {
-                console.error("Error al cargar productos:", error);
-            }
+            } catch (err) { console.error(err); }
         }
 
         async function cargarSolicitudes() {
             try {
-                const response = await fetch(`${API_URL}/api/solicitudes`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) return;
-
-                const solicitudes = await response.json();
+                const res = await fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const solicitudes = await res.json();
                 const tbody = document.getElementById("tablaSolicitudes");
                 
                 if (solicitudes.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="no-data">No hay solicitudes registradas.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay solicitudes.</td></tr>`;
                     return;
                 }
 
                 tbody.innerHTML = "";
                 solicitudes.forEach(sol => {
-                    const tr = document.createElement("tr");
-                    
-                    // Si es ADMIN, se muestra un menú desplegable para cambiar el estado al vuelo
-                    let celdaEstado = rolUsuario === "ADMIN" 
-                        ? `<td>
-                             <select onchange="cambiarEstado('${sol._id || sol.id}', this.value)">
-                                <option value="Pendiente" ${sol.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                                <option value="Aprobada" ${sol.estado === 'Aprobada' ? 'selected' : ''}>Aprobada</option>
-                                <option value="Rechazada" ${sol.estado === 'Rechazada' ? 'selected' : ''}>Rechazada</option>
-                             </select>
-                           </td>`
-                        : `<td>${sol.estado || 'Pendiente'}</td>`;
+                    const nombreProd = sol.producto?.nombre || sol.titulo || 'Producto';
+                    const celdaEstado = rolUsuario === "ADMIN" 
+                        ? `<select onchange="cambiarEstado('${sol._id}', this.value)">
+                             <option value="Pendiente" ${sol.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                             <option value="Aprobada" ${sol.estado === 'Aprobada' ? 'selected' : ''}>Aprobada</option>
+                             <option value="Rechazada" ${sol.estado === 'Rechazada' ? 'selected' : ''}>Rechazada</option>
+                           </select>`
+                        : `<span>${sol.estado || 'Pendiente'}</span>`;
 
-                    let columnaAccion = rolUsuario === "ADMIN" 
-                        ? `<td><button class="btn-danger" onclick="eliminarSolicitud('${sol._id || sol.id}')">Eliminar</button></td>`
-                        : `<td>-</td>`;
+                    const accion = rolUsuario === "ADMIN" 
+                        ? `<button class="btn-danger" onclick="eliminarSolicitud('${sol._id}')">Eliminar</button>` 
+                        : `-`;
 
-                    const nombreProducto = sol.producto?.nombre || sol.titulo || 'Producto';
-                    const cantidadSolicitada = sol.cantidad || 1;
-
-                    tr.innerHTML = `
-                        <td>${nombreProducto}</td>
-                        <td>${cantidadSolicitada}</td>
-                        <td>${sol.prioridad || ''}</td>
-                        ${celdaEstado}
-                        ${columnaAccion}
-                    `;
-                    tbody.appendChild(tr);
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${nombreProd}</td>
+                            <td>${sol.cantidad}</td>
+                            <td>${sol.solicitante || 'N/D'}</td>
+                            <td>${celdaEstado}</td>
+                            <td>${accion}</td>
+                        </tr>`;
                 });
-            } catch (error) {
-                console.error("Error al cargar solicitudes:", error);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        // Función para cambiar el estado (Solo ADMIN)
         async function cambiarEstado(id, nuevoEstado) {
-            try {
-                const response = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ estado: nuevoEstado })
-                });
+            await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ estado: nuevoEstado })
+            });
+            alert("Estado actualizado");
+            cargarSolicitudes();
+        }
 
-                if (response.ok) {
-                    alert("¡Estado actualizado con éxito!");
-                    cargarSolicitudes();
-                } else {
-                    alert("Error al actualizar el estado.");
-                }
-            } catch (error) {
-                console.error("Error de red:", error);
-                alert("No se pudo conectar con el servidor.");
-            }
+        async function eliminarSolicitud(id) {
+            if (!confirm("¿Eliminar solicitud?")) return;
+            await fetch(`${API_URL}/api/solicitudes/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            cargarSolicitudes();
         }
 
         document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-
-            const selectProd = document.getElementById("productoSelect");
-            const nuevaSolicitud = {
-                producto: selectProd.value,
-                titulo: selectProd.options[selectProd.selectedIndex].text,
+            const select = document.getElementById("productoSelect");
+            const nueva = {
+                producto: select.value,
+                titulo: select.options[select.selectedIndex].text,
                 cantidad: Number(document.getElementById("cantidad").value),
-                prioridad: document.getElementById("prioridad").value,
+                solicitante: document.getElementById("solicitante").value,
                 descripcion: document.getElementById("descripcion").value
             };
 
-            try {
-                const response = await fetch(`${API_URL}/api/solicitudes`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(nuevaSolicitud)
-                });
+            const res = await fetch(`${API_URL}/api/solicitudes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(nueva)
+            });
 
-                if (response.ok) {
-                    alert("¡Solicitud creada con éxito!");
-                    document.getElementById("solicitudForm").reset();
-                    cargarSolicitudes();
-                } else {
-                    alert("Error al crear la solicitud.");
-                }
-            } catch (error) {
-                console.error("Error de red:", error);
-                alert("No se pudo conectar con el servidor.");
+            if (res.ok) {
+                alert("¡Solicitud creada y stock descontado!");
+                document.getElementById("solicitudForm").reset();
+                cargarProductosEnSelect();
+                cargarSolicitudes();
+            } else {
+                const err = await res.json();
+                alert(err.mensaje || "Error al crear");
             }
         });
-
-        async function eliminarSolicitud(id) {
-            if (rolUsuario !== "ADMIN") {
-                alert("No tienes permisos para realizar esta acción.");
-                return;
-            }
-
-            if (!confirm("¿Estás seguro de eliminar esta solicitud?")) return;
-
-            try {
-                const response = await fetch(`${API_URL}/api/solicitudes/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    alert("Solicitud eliminada con éxito");
-                    cargarSolicitudes();
-                } else {
-                    alert("Error al eliminar la solicitud.");
-                }
-            } catch (error) {
-                console.error("Error de red:", error);
-                alert("No se pudo conectar con el servidor.");
-            }
-        }
     </script>
 </body>
 </html>

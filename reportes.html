@@ -9,10 +9,12 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
+        
         .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; }
         .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
         .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
         .sidebar nav a.active { background-color: #334155; color: white; }
+        
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
         
         .stats-grid { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
@@ -27,13 +29,14 @@
         .btn-excel:hover { background-color: #15803d; }
         
         .table-container { overflow-x: auto; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 400px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
         th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
         th { color: #64748b; font-weight: 600; }
         
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; }
+            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
         }
     </style>
 </head>
@@ -79,7 +82,7 @@
                         <tr>
                             <th>Producto</th>
                             <th>Cantidad</th>
-                            <th>Prioridad</th>
+                            <th>Solicitante</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
@@ -94,7 +97,6 @@
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
-        let solicitudesGlobales = [];
 
         document.addEventListener("DOMContentLoaded", () => {
             cargarDatosReporte();
@@ -110,26 +112,26 @@
                 if (!resProd.ok || !resSol.ok) return;
 
                 const productos = await resProd.json();
-                solicitudesGlobales = await resSol.json();
+                const solicitudes = await resSol.json();
 
                 document.getElementById("totalProductos").textContent = productos.length;
-                document.getElementById("totalPendientes").textContent = solicitudesGlobales.filter(s => s.estado === 'Pendiente' || !s.estado).length;
-                document.getElementById("totalAprobadas").textContent = solicitudesGlobales.filter(s => s.estado === 'Aprobada').length;
+                document.getElementById("totalPendientes").textContent = solicitudes.filter(s => s.estado === 'Pendiente' || !s.estado).length;
+                document.getElementById("totalAprobadas").textContent = solicitudes.filter(s => s.estado === 'Aprobada').length;
 
                 const tbody = document.getElementById("tablaReportes");
-                if (solicitudesGlobales.length === 0) {
+                if (solicitudes.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">No hay registros.</td></tr>`;
                     return;
                 }
 
                 tbody.innerHTML = "";
-                solicitudesGlobales.forEach(sol => {
+                solicitudes.forEach(sol => {
                     const tr = document.createElement("tr");
                     const nombreProd = sol.producto?.nombre || sol.titulo || 'Producto';
                     tr.innerHTML = `
                         <td>${nombreProd}</td>
                         <td>${sol.cantidad || 1}</td>
-                        <td>${sol.prioridad || 'Media'}</td>
+                        <td>${sol.solicitante || 'N/D'}</td>
                         <td><strong>${sol.estado || 'Pendiente'}</strong></td>
                     `;
                     tbody.appendChild(tr);
@@ -139,7 +141,6 @@
             }
         }
 
-        // Función para exportar la tabla a Excel
         function exportarExcel() {
             const tabla = document.getElementById("tablaReportesExcel");
             const libro = XLSX.utils.table_to_book(tabla, { sheet: "Reporte Solicitudes" });
