@@ -157,9 +157,7 @@
                 tbody.innerHTML = "";
                 solicitudes.forEach(s => {
                     const nombreProd = s.producto?.nombre || "Producto";
-                    
-                    // Lee de manera segura el nombre del solicitante de cualquier propiedad posible
-                    const nombreSolicitante = s.solicitante || s.nombreSolicitante || s.usuario || s.nombre || "N/D";
+                    const nombreSolicitante = s.solicitante || s.nombreSolicitante || "N/D";
 
                     const accion = rolUsuario === "ADMIN" 
                         ? `<button class="btn-danger" onclick="eliminarSolicitud('${s._id}')">Eliminar</button>` 
@@ -208,6 +206,7 @@
                     alert("¡Solicitud creada exitosamente!");
                     document.getElementById("solicitudForm").reset();
                     cargarSolicitudes();
+                    cargarProductosSelect(); // Actualiza el stock en el selector
                 } else {
                     alert("Error: " + (data.mensaje || "No se pudo crear la solicitud"));
                 }
@@ -234,7 +233,7 @@
         }
 
         async function eliminarSolicitud(id) {
-            if (!confirm("¿Deseas eliminar esta solicitud?")) return;
+            if (!confirm("¿Deseas eliminar esta solicitud? Se devolverá el stock al producto.")) return;
 
             try {
                 const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
@@ -244,6 +243,7 @@
 
                 if (res.ok) {
                     cargarSolicitudes();
+                    cargarProductosSelect(); // Actualiza el stock en el selector al eliminar
                 } else {
                     const data = await res.json();
                     alert("Error al eliminar: " + (data.mensaje || "Desconocido"));
