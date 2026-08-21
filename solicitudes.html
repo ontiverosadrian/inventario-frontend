@@ -3,111 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitudes</title>
+    <title>Sistema de Inventario - Solicitudes</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { padding: 20px; background: #f4f4f9; }
-        nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        button { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; color: white; }
-        .btn-aprob { background: #28a745; }
-        .btn-rech { background: #dc3545; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
+        
+        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
+        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
+        .sidebar nav a.active { background-color: #334155; color: white; }
+        
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-align: center; }
+        .btn-logout:hover { background-color: #b91c1c; }
+
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .content-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #475569; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
+        .form-group textarea { resize: vertical; height: 80px; }
+        
+        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-danger { background-color: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        
+        .table-container { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
+        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+        th { color: #64748b; font-weight: 600; }
+        
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
+        }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="index.html">Productos</a>
-        <a href="solicitudes.html">Solicitudes</a>
-        <button onclick="cerrarSesion()" style="float: right; background: #6c757d; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
-    </nav>
+    <div class="sidebar">
+        <div>
+            <h2>📦 Inventario</h2>
+            <nav>
+                <a href="index.html">Productos</a>
+                <a href="solicitudes.html" class="active">Solicitudes</a>
+                <a href="reportes.html">Reportes</a>
+            </nav>
+        </div>
+        <div>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
+    </div>
 
-    <h1>Solicitudes</h1>
-    <br>
+    <div class="main-content">
+        <h1>📋 Gestión de Solicitudes</h1>
+        <br>
+        <div class="content-grid">
+            <div class="card">
+                <h3>Nueva Solicitud</h3>
+                <form id="solicitudForm">
+                    <div class="form-group">
+                        <label>Producto</label>
+                        <select id="productoSelect" required>
+                            <option value="">Cargando productos...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad</label>
+                        <input type="number" id="cantidad" min="1" required placeholder="Ej. 2">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Solicitante</label>
+                        <input type="text" id="solicitante" required placeholder="Ej. Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label>Observaciones</label>
+                        <textarea id="descripcion" placeholder="Detalles..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">Crear Solicitud</button>
+                </form>
+            </div>
 
-    <div class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Solicitante</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="listaSolicitudes">
-                <tr><td colspan="4">Cargando...</td></tr>
-            </tbody>
-        </table>
+            <div class="card">
+                <h3>Solicitudes Registradas</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cant.</th>
+                                <th>Solicitante</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaSolicitudes">
+                            <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
-        const rol = localStorage.getItem("rolUsuario");
+        const rolUsuario = localStorage.getItem("rolUsuario") || "USER";
 
-        if (!token) window.location.href = "login.html";
-
-        async function cargarSolicitudes() {
-            try {
-                const res = await fetch(`${API_URL}/api/solicitudes`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const solicitudes = await res.json();
-                const lista = document.getElementById("listaSolicitudes");
-                
-                if (solicitudes.length === 0) {
-                    lista.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay solicitudes.</td></tr>';
-                    return;
-                }
-
-                lista.innerHTML = solicitudes.map(s => `
-                    <tr>
-                        <td>${s.titulo}</td>
-                        <td>${s.solicitante}</td>
-                        <td><strong>${s.estado}</strong></td>
-                        <td>
-                            ${rol === "ADMIN" ? `
-                                <button class="btn-aprob" onclick="cambiarEstado('${s._id}', 'Aprobada')">Aprobar</button>
-                                <button class="btn-rech" onclick="cambiarEstado('${s._id}', 'Rechazada')">Rechazar</button>
-                            ` : '<span style="color: #666; font-size: 13px;">Solo lectura</span>'}
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (err) {
-                console.error(err);
-            }
+        if (!token) {
+            window.location.href = "login.html";
         }
 
-        async function cambiarEstado(id, nuevoEstado) {
-            if (rol !== "ADMIN") return;
-
-            const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify({ estado: nuevoEstado })
-            });
-
-            if (res.ok) {
-                cargarSolicitudes();
-            } else {
-                alert("Error al actualizar estado");
-            }
-        }
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarProductosEnSelect();
+            cargarSolicitudes();
+        });
 
         function cerrarSesion() {
             localStorage.clear();
             window.location.href = "login.html";
         }
 
-        cargarSolicitudes();
+        async function cargarProductosEnSelect() {
+            try {
+                const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
+                const productos = await res.json();
+                const select = document.getElementById("productoSelect");
+                select.innerHTML = `<option value="">Selecciona un producto...</option>`;
+                productos.forEach(p => {
+                    select.innerHTML += `<option value="${p._id}">${p.nombre} (Stock: ${p.cantidad})</option>`;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function cargarSolicitudes() {
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
+                const solicitudes = await res.json();
+                const tbody = document.getElementById("tablaSolicitudes");
+                
+                if (solicitudes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay solicitudes.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = "";
+                solicitudes.forEach(sol => {
+                    const nombreProd = sol.producto?.nombre || sol.titulo || 'Producto';
+                    
+                    const celdaEstado = rolUsuario === "ADMIN" 
+                        ? `<select onchange="cambiarEstado('${sol._id}', this.value)">
+                             <option value="Pendiente" ${sol.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                             <option value="Aprobada" ${sol.estado === 'Aprobada' ? 'selected' : ''}>Aprobada</option>
+                             <option value="Rechazada" ${sol.estado === 'Rechazada' ? 'selected' : ''}>Rechazada</option>
+                           </select>`
+                        : `<span>${sol.estado || 'Pendiente'}</span>`;
+
+                    const accion = rolUsuario === "ADMIN" 
+                        ? `<button class="btn-danger" onclick="eliminarSolicitud('${sol._id}')">Eliminar</button>` 
+                        : `-`;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${nombreProd}</td>
+                            <td>${sol.cantidad}</td>
+                            <td>${sol.solicitante || 'N/D'}</td>
+                            <td>${celdaEstado}</td>
+                            <td>${accion}</td>
+                        </tr>`;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function cambiarEstado(id, nuevoEstado) {
+            if (rolUsuario !== "ADMIN") {
+                alert("No tienes permisos para realizar esta acción.");
+                return;
+            }
+            const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ estado: nuevoEstado })
+            });
+            if (res.ok) {
+                alert("Estado actualizado");
+                cargarSolicitudes();
+            } else {
+                alert("Error al actualizar el estado");
+            }
+        }
+
+        async function eliminarSolicitud(id) {
+            if (rolUsuario !== "ADMIN") {
+                alert("No tienes permisos para eliminar.");
+                return;
+            }
+            if (!confirm("¿Eliminar solicitud?")) return;
+            const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                cargarSolicitudes();
+            } else {
+                alert("Error al eliminar");
+            }
+        }
+
+        document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const select = document.getElementById("productoSelect");
+            const nueva = {
+                producto: select.value,
+                titulo: select.options[select.selectedIndex].text,
+                cantidad: Number(document.getElementById("cantidad").value),
+                solicitante: document.getElementById("solicitante").value,
+                descripcion: document.getElementById("descripcion").value
+            };
+
+            const res = await fetch(`${API_URL}/api/solicitudes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(nueva)
+            });
+
+            if (res.ok) {
+                alert("¡Solicitud creada y stock descontado!");
+                document.getElementById("solicitudForm").reset();
+                cargarProductosEnSelect();
+                cargarSolicitudes();
+            } else {
+                const err = await res.json();
+                alert(err.mensaje || "Error al crear");
+            }
+        });
     </script>
 </body>
 </html>

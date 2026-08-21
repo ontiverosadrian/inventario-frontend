@@ -3,133 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos</title>
+    <title>Gestión de Productos - Admin</title>
+    <link rel="stylesheet" href="css/styles.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        body { padding: 20px; background: #f4f4f9; }
-        nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-delete { background: #dc3545; color: white; }
-        .btn-add { background: #28a745; color: white; }
-        .admin-only { display: none; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f9; }
+        header { background: #333; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 5px; }
+        nav a { color: #fff; text-decoration: none; margin-right: 15px; font-weight: bold; }
+        .container { margin-top: 30px; }
+        .card { background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="index.html">Inicio</a>
-        <a href="productos.html">Productos</a>
-        <a href="solicitudes.html">Solicitudes</a>
-        <a href="reportes.html">Reportes</a>
-        <button onclick="cerrarSesion()" style="float: right; background: #6c757d; color: white;">Cerrar Sesión</button>
-    </nav>
+    <header>
+        <h1>Panel de Administración</h1>
+        <nav>
+            <a href="index.html">Inicio</a>
+            <a href="productos.html">Productos</a>
+            <a href="reportes.html">Reportes</a>
+        </nav>
+    </header>
 
-    <h1>Gestión de Productos</h1>
-    <br>
-
-    <!-- Panel exclusivo para Administrador -->
-    <div id="adminPanel" class="card admin-only">
-        <h3>Agregar Producto</h3>
-        <div style="margin-top: 10px;">
-            <input type="text" id="nombre" placeholder="Nombre" style="padding: 8px; margin-right: 10px;">
-            <input type="number" id="cantidad" placeholder="Stock" style="padding: 8px; margin-right: 10px;">
-            <button class="btn-add" onclick="guardarProducto()">Guardar</button>
+    <div class="container">
+        <div class="card">
+            <h2>Gestión de Productos</h2>
+            <p>Aquí puedes agregar, editar o ver el stock de los productos.</p>
         </div>
     </div>
 
-    <div class="card">
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Stock</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="listaProductos">
-                <tr><td colspan="3">Cargando...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
+    <!-- Script de seguridad para proteger la página -->
     <script>
-        const API_URL = "https://inventario-backend-mojz.onrender.com";
-        const token = localStorage.getItem("token");
-        const rol = localStorage.getItem("rolUsuario");
-
-        if (!token) window.location.href = "login.html";
-
-        if (rol === "ADMIN") {
-            document.getElementById("adminPanel").style.display = "block";
+        const usuario = JSON.parse(localStorage.getItem('usuario'));
+        
+        // Si no hay sesión o el usuario NO es ADMIN, lo sacamos de aquí
+        if (!usuario || usuario.rol !== 'ADMIN') {
+            alert("Acceso denegado. Esta sección es exclusiva para administradores.");
+            window.location.href = 'index.html';
         }
-
-        async function cargarProductos() {
-            try {
-                const res = await fetch(`${API_URL}/api/productos`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const productos = await res.json();
-                const lista = document.getElementById("listaProductos");
-                
-                lista.innerHTML = productos.map(p => `
-                    <tr>
-                        <td>${p.nombre}</td>
-                        <td>${p.cantidad}</td>
-                        <td>
-                            ${rol === "ADMIN" ? `
-                                <button class="btn-delete" onclick="eliminarProducto('${p._id}')">Eliminar</button>
-                            ` : '<span style="color: #666; font-size: 13px;">Solo lectura</span>'}
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function guardarProducto() {
-            const nombre = document.getElementById("nombre").value;
-            const cantidad = document.getElementById("cantidad").value;
-
-            const res = await fetch(`${API_URL}/api/productos`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ nombre, cantidad })
-            });
-
-            if (res.ok) {
-                document.getElementById("nombre").value = "";
-                document.getElementById("cantidad").value = "";
-                cargarProductos();
-            } else {
-                alert("Error al guardar");
-            }
-        }
-
-        async function eliminarProducto(id) {
-            if (rol !== "ADMIN") return;
-            if (!confirm("¿Seguro que deseas eliminar?")) return;
-
-            const res = await fetch(`${API_URL}/api/productos/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (res.ok) cargarProductos();
-            else alert("No autorizado para eliminar");
-        }
-
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = "login.html";
-        }
-
-        cargarProductos();
     </script>
 </body>
 </html>
