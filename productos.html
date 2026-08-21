@@ -3,43 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Productos - Admin</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Productos</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f9; }
-        header { background: #333; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 5px; }
-        nav a { color: #fff; text-decoration: none; margin-right: 15px; font-weight: bold; }
-        .container { margin-top: 30px; }
-        .card { background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        body { font-family: sans-serif; margin: 20px; background: #f4f4f9; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .container { display: flex; gap: 20px; align-items: flex-start; }
+        .form-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 300px; }
+        .table-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; background: #28a745; color: white; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
+        .btn-delete { background: #dc3545; color: white; padding: 5px 10px; width: auto; }
+        .admin-only { display: none; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Panel de Administración</h1>
-        <nav>
-            <a href="index.html">Inicio</a>
-            <a href="productos.html">Productos</a>
-            <a href="reportes.html">Reportes</a>
-        </nav>
-    </header>
+    <nav>
+        <a href="index.html">Inicio</a>
+        <a href="productos.html">Productos</a>
+        <a href="solicitudes.html">Solicitudes</a>
+        <a href="reportes.html">Reportes</a>
+        <button onclick="cerrarSesion()" style="float: right; background: #6c757d; width: auto;">Cerrar Sesión</button>
+    </nav>
+
+    <h1>Gestión de Productos</h1>
+    <br>
 
     <div class="container">
-        <div class="card">
-            <h2>Gestión de Productos</h2>
-            <p>Aquí puedes agregar, editar o ver el stock de los productos.</p>
+        <!-- Cuadro para ingresar información (Visible solo para ADMIN o según prefieras) -->
+        <div id="adminPanel" class="form-card admin-only">
+            <h3>Agregar Producto</h3>
+            <div class="form-group" style="margin-top: 15px;">
+                <label>Nombre:</label>
+                <input type="text" id="nombre" placeholder="Ej. Martillo">
+            </div>
+            <div class="form-group">
+                <label>Cantidad:</label>
+                <input type="number" id="cantidad" placeholder="Ej. 10">
+            </div>
+            <button onclick="guardarProducto()">Guardar</button>
+        </div>
+
+        <!-- Tabla con la información al lado -->
+        <div class="table-card">
+            <h3>Lista de Productos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="listaProductos">
+                    <tr><td colspan="3">Cargando...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Script de seguridad para proteger la página -->
     <script>
-        const usuario = JSON.parse(localStorage.getItem('usuario'));
-        
-        // Si no hay sesión o el usuario NO es ADMIN, lo sacamos de aquí
-        if (!usuario || usuario.rol !== 'ADMIN') {
-            alert("Acceso denegado. Esta sección es exclusiva para administradores.");
-            window.location.href = 'index.html';
+        const API_URL = "https://inventario-backend-mojz.onrender.com";
+        const token = localStorage.getItem("token");
+        const rol = localStorage.getItem("rolUsuario");
+
+        if (!token) window.location.href = "login.html";
+        if (rol === "ADMIN") document.getElementById("adminPanel").style.display = "block";
+
+        async function cargarProductos() {
+            try {
+                const res = await fetch(`${API_URL}/api/productos`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const productos = await res.json();
+                const lista = document.getElementById("listaProductos");
+                
+                lista.innerHTML = productos.map(p => `
+                    <tr>
+                        <td>${p.nombre}</td>
+                        <td>${p.cantidad}</td>
+                        <td>
+                            ${rol === "ADMIN" ? `<button class="btn-delete" onclick="eliminarProducto('${p._id}')">Eliminar</button>` : 'Solo lectura'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
         }
+
+        async function guardarProducto() {
+            const nombre = document.getElementById("nombre").value;
+            const cantidad = document.getElementById("cantidad").value;
+
+            const res = await fetch(`${API_URL}/api/productos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ nombre, cantidad })
+            });
+
+            if (res.ok) {
+                document.getElementById("nombre").value = "";
+                document.getElementById("cantidad").value = "";
+                cargarProductos();
+            } else {
+                alert("Error al guardar");
+            }
+        }
+
+        async function eliminarProducto(id) {
+            if (rol !== "ADMIN") return;
+            if (!confirm("¿Eliminar producto?")) return;
+
+            const res = await fetch(`${API_URL}/api/productos/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) cargarProductos();
+        }
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+
+        cargarProductos();
     </script>
 </body>
 </html>
