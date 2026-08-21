@@ -18,22 +18,21 @@
 
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
         .content-grid { display: flex; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 320px; }
         
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; color: #475569; font-size: 14px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
-        .form-group textarea { resize: vertical; height: 80px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; color: #475569; font-size: 13px; font-weight: 600; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
         
-        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 5px; }
         .btn-primary:hover { background-color: #1d4ed8; }
         .btn-danger { background-color: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         
         .table-container { overflow-x: auto; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
-        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
+        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
         th { color: #64748b; font-weight: 600; }
-        
+
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; }
@@ -61,13 +60,14 @@
         <h1>📋 Gestión de Solicitudes</h1>
         <br>
         <div class="content-grid">
+            <!-- Formulario de Nueva Solicitud -->
             <div class="card">
                 <h3>Nueva Solicitud</h3>
                 <form id="solicitudForm">
                     <div class="form-group">
                         <label>Producto</label>
                         <select id="productoSelect" required>
-                            <option value="">Cargando productos...</option>
+                            <option value="">Selecciona un producto...</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -80,12 +80,13 @@
                     </div>
                     <div class="form-group">
                         <label>Observaciones</label>
-                        <textarea id="descripcion" placeholder="Detalles..."></textarea>
+                        <textarea id="observaciones" placeholder="Detalles..."></textarea>
                     </div>
                     <button type="submit" class="btn-primary">Crear Solicitud</button>
                 </form>
             </div>
 
+            <!-- Tabla de Solicitudes Registradas -->
             <div class="card">
                 <h3>Solicitudes Registradas</h3>
                 <div class="table-container">
@@ -99,7 +100,7 @@
                                 <th>Acción</th>
                             </tr>
                         </thead>
-                        <tbody id="tablaSolicitudes">
+                        <tbody id="listaSolicitudes">
                             <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Cargando...</td></tr>
                         </tbody>
                     </table>
@@ -118,7 +119,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            cargarProductosEnSelect();
+            cargarProductosSelect();
             cargarSolicitudes();
         });
 
@@ -127,121 +128,137 @@
             window.location.href = "login.html";
         }
 
-        async function cargarProductosEnSelect() {
+        // Cargar productos en el elemento <select>
+        async function cargarProductosSelect() {
             try {
                 const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
                 const productos = await res.json();
                 const select = document.getElementById("productoSelect");
-                select.innerHTML = `<option value="">Selecciona un producto...</option>`;
+                
+                select.innerHTML = '<option value="">Selecciona un producto...</option>';
                 productos.forEach(p => {
                     select.innerHTML += `<option value="${p._id}">${p.nombre} (Stock: ${p.cantidad})</option>`;
                 });
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error("Error al cargar productos:", err);
+            }
         }
 
+        // Cargar solicitudes en la tabla
         async function cargarSolicitudes() {
             try {
                 const res = await fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
                 const solicitudes = await res.json();
-                const tbody = document.getElementById("tablaSolicitudes");
-                
-                if (solicitudes.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay solicitudes.</td></tr>`;
+                const tbody = document.getElementById("listaSolicitudes");
+
+                if (!Array.isArray(solicitudes) || solicitudes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay solicitudes registradas.</td></tr>`;
                     return;
                 }
 
                 tbody.innerHTML = "";
-                solicitudes.forEach(sol => {
-                    const nombreProd = sol.producto?.nombre || sol.titulo || 'Producto';
+                solicitudes.forEach(s => {
+                    // Extraer de forma segura el nombre del producto (ya sea objeto poblado o texto)
+                    const nombreProd = s.producto?.nombre || s.nombreProducto || "Producto";
                     
-                    const celdaEstado = rolUsuario === "ADMIN" 
-                        ? `<select onchange="cambiarEstado('${sol._id}', this.value)">
-                             <option value="Pendiente" ${sol.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                             <option value="Aprobada" ${sol.estado === 'Aprobada' ? 'selected' : ''}>Aprobada</option>
-                             <option value="Rechazada" ${sol.estado === 'Rechazada' ? 'selected' : ''}>Rechazada</option>
-                           </select>`
-                        : `<span>${sol.estado || 'Pendiente'}</span>`;
+                    // Detectar automáticamente el campo del solicitante sin importar cómo se guardó en la BD
+                    const nombreSolicitante = s.solicitante || s.nombreSolicitante || s.usuario || "N/D";
 
+                    // Botón de eliminar solo para administradores
                     const accion = rolUsuario === "ADMIN" 
-                        ? `<button class="btn-danger" onclick="eliminarSolicitud('${sol._id}')">Eliminar</button>` 
-                        : `-`;
+                        ? `<button class="btn-danger" onclick="eliminarSolicitud('${s._id}')">Eliminar</button>` 
+                        : `<span style="color:#94a3b8; font-size:12px;">Lectura</span>`;
 
                     tbody.innerHTML += `
                         <tr>
                             <td>${nombreProd}</td>
-                            <td>${sol.cantidad}</td>
-                            <td>${sol.solicitante || 'N/D'}</td>
-                            <td>${celdaEstado}</td>
+                            <td>${s.cantidad}</td>
+                            <td>${nombreSolicitante}</td>
+                            <td>
+                                <select ${rolUsuario !== 'ADMIN' ? 'disabled' : ''} onchange="actualizarEstado('${s._id}', this.value)">
+                                    <option value="Pendiente" ${s.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                                    <option value="Aprobada" ${s.estado === 'Aprobada' ? 'selected' : ''}>Aprobada</option>
+                                    <option value="Rechazada" ${s.estado === 'Rechazada' ? 'selected' : ''}>Rechazada</option>
+                                </select>
+                            </td>
                             <td>${accion}</td>
                         </tr>`;
                 });
-            } catch (err) { console.error(err); }
-        }
-
-        async function cambiarEstado(id, nuevoEstado) {
-            if (rolUsuario !== "ADMIN") {
-                alert("No tienes permisos para realizar esta acción.");
-                return;
-            }
-            const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ estado: nuevoEstado })
-            });
-            if (res.ok) {
-                alert("Estado actualizado");
-                cargarSolicitudes();
-            } else {
-                alert("Error al actualizar el estado");
+            } catch (err) {
+                console.error("Error al cargar solicitudes:", err);
             }
         }
 
-        async function eliminarSolicitud(id) {
-            if (rolUsuario !== "ADMIN") {
-                alert("No tienes permisos para eliminar.");
-                return;
-            }
-            if (!confirm("¿Eliminar solicitud?")) return;
-            const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                cargarSolicitudes();
-            } else {
-                alert("Error al eliminar");
-            }
-        }
-
+        // Enviar nueva solicitud
         document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const select = document.getElementById("productoSelect");
-            const nueva = {
-                producto: select.value,
-                titulo: select.options[select.selectedIndex].text,
+
+            const nuevaSolicitud = {
+                producto: document.getElementById("productoSelect").value,
                 cantidad: Number(document.getElementById("cantidad").value),
-                solicitante: document.getElementById("solicitante").value,
-                descripcion: document.getElementById("descripcion").value
+                solicitante: document.getElementById("solicitante").value.trim(),
+                observaciones: document.getElementById("observaciones").value.trim()
             };
 
-            const res = await fetch(`${API_URL}/api/solicitudes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(nueva)
-            });
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(nuevaSolicitud)
+                });
 
-            if (res.ok) {
-                alert("¡Solicitud creada y stock descontado!");
-                document.getElementById("solicitudForm").reset();
-                cargarProductosEnSelect();
-                cargarSolicitudes();
-            } else {
-                const err = await res.json();
-                alert(err.mensaje || "Error al crear");
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert("¡Solicitud creada exitosamente!");
+                    document.getElementById("solicitudForm").reset();
+                    cargarSolicitudes();
+                } else {
+                    alert("Error: " + (data.mensaje || "No se pudo crear la solicitud"));
+                }
+            } catch (err) {
+                alert("Error de red: " + err.message);
             }
         });
+
+        // Cambiar estado (Solo Admin)
+        async function actualizarEstado(id, nuevoEstado) {
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                if (!res.ok) {
+                    alert("No se pudo actualizar el estado.");
+                    cargarSolicitudes();
+                }
+            } catch (err) {
+                alert("Error de red: " + err.message);
+            }
+        }
+
+        // Eliminar solicitud (Solo Admin)
+        async function eliminarSolicitud(id) {
+            if (!confirm("¿Deseas eliminar esta solicitud?")) return;
+
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    cargarSolicitudes();
+                } else {
+                    const data = await res.json();
+                    alert("Error al eliminar: " + (data.mensaje || "Desconocido"));
+                }
+            } catch (err) {
+                alert("Error de red: " + err.message);
+            }
+        }
     </script>
 </body>
 </html>
