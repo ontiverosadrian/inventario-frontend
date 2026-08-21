@@ -128,7 +128,6 @@
             window.location.href = "login.html";
         }
 
-        // Cargar productos en el elemento <select>
         async function cargarProductosSelect() {
             try {
                 const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -144,7 +143,6 @@
             }
         }
 
-        // Cargar solicitudes en la tabla
         async function cargarSolicitudes() {
             try {
                 const res = await fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -158,13 +156,9 @@
 
                 tbody.innerHTML = "";
                 solicitudes.forEach(s => {
-                    // Extraer de forma segura el nombre del producto (ya sea objeto poblado o texto)
-                    const nombreProd = s.producto?.nombre || s.nombreProducto || "Producto";
-                    
-                    // Detectar automáticamente el campo del solicitante sin importar cómo se guardó en la BD
-                    const nombreSolicitante = s.solicitante || s.nombreSolicitante || s.usuario || "N/D";
+                    const nombreProd = s.producto?.nombre || "Producto";
+                    const nombreSolicitante = s.solicitante || s.nombreSolicitante || "N/D";
 
-                    // Botón de eliminar solo para administradores
                     const accion = rolUsuario === "ADMIN" 
                         ? `<button class="btn-danger" onclick="eliminarSolicitud('${s._id}')">Eliminar</button>` 
                         : `<span style="color:#94a3b8; font-size:12px;">Lectura</span>`;
@@ -189,7 +183,6 @@
             }
         }
 
-        // Enviar nueva solicitud
         document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -197,7 +190,7 @@
                 producto: document.getElementById("productoSelect").value,
                 cantidad: Number(document.getElementById("cantidad").value),
                 solicitante: document.getElementById("solicitante").value.trim(),
-                observaciones: document.getElementById("observaciones").value.trim()
+                descripcion: document.getElementById("observaciones").value.trim()
             };
 
             try {
@@ -221,10 +214,10 @@
             }
         });
 
-        // Cambiar estado (Solo Admin)
+        // Corregido para apuntar a la ruta /:id/estado que definiste en tu backend
         async function actualizarEstado(id, nuevoEstado) {
             try {
-                const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
+                const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ estado: nuevoEstado })
@@ -239,7 +232,6 @@
             }
         }
 
-        // Eliminar solicitud (Solo Admin)
         async function eliminarSolicitud(id) {
             if (!confirm("¿Deseas eliminar esta solicitud?")) return;
 
