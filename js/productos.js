@@ -1,10 +1,18 @@
-// Al cargar la página de productos
-const usuario = JSON.parse(localStorage.getItem('usuario')); // Supongamos que lo guardas así al loguear
+router.post('/productos', verificarToken, async (req, res) => {
+    try {
+        const { nombre, cantidad } = req.body;
+        
+        // Validación básica antes de guardar
+        if (!nombre || cantidad === undefined) {
+            return res.status(400).json({ mensaje: "Nombre y cantidad son requeridos" });
+        }
 
-if (usuario && usuario.rol === 'EMPLEADO') {
-    // Ocultar botones de borrar o editar
-    const botonesAdmin = document.querySelectorAll('.btn-admin');
-    botonesAdmin.forEach(btn => btn.style.display = 'none');
-    
-    // Solo mostrar el botón de "Hacer Solicitud"
-}
+        const nuevoProducto = new Producto({ nombre, cantidad });
+        await nuevoProducto.save();
+        res.status(201).json(nuevoProducto);
+    } catch (err) {
+        console.error("Error en servidor:", err);
+        // Enviamos el mensaje real del error al frontend
+        res.status(500).json({ mensaje: err.message });
+    }
+});
