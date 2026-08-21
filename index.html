@@ -18,19 +18,19 @@
 
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
         .content-grid { display: flex; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 320px; }
         
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; color: #475569; font-size: 14px; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; color: #475569; font-size: 13px; font-weight: 600; }
+        .form-group input, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
         
-        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 5px; }
         .btn-primary:hover { background-color: #1d4ed8; }
         .btn-danger { background-color: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         
         .table-container { overflow-x: auto; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
-        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
+        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
         th { color: #64748b; font-weight: 600; }
         
         .admin-only { display: none; }
@@ -68,12 +68,28 @@
                 <h3>Nuevo Producto</h3>
                 <form id="productoForm">
                     <div class="form-group">
-                        <label>Nombre del Producto</label>
-                        <input type="text" id="nombre" required placeholder="Ej. Taladro">
+                        <label>Nombre del Producto *</label>
+                        <input type="text" id="nombre" required placeholder="Ej. Taladro percutor">
                     </div>
                     <div class="form-group">
-                        <label>Cantidad / Stock</label>
+                        <label>Descripción</label>
+                        <textarea id="descripcion" placeholder="Detalles opcionales..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría *</label>
+                        <input type="text" id="categoria" required placeholder="Ej. Herramientas">
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad / Stock *</label>
                         <input type="number" id="cantidad" min="0" required placeholder="Ej. 10">
+                    </div>
+                    <div class="form-group">
+                        <label>Unidad de Medida *</label>
+                        <input type="text" id="unidadMedida" required placeholder="Ej. Piezas, Litros, Kg">
+                    </div>
+                    <div class="form-group">
+                        <label>Stock Mínimo *</label>
+                        <input type="number" id="stockMinimo" min="0" required placeholder="Ej. 2">
                     </div>
                     <button type="submit" class="btn-primary">Guardar Producto</button>
                 </form>
@@ -87,12 +103,15 @@
                         <thead>
                             <tr>
                                 <th>Nombre</th>
+                                <th>Categoría</th>
                                 <th>Stock</th>
+                                <th>Unidad</th>
+                                <th>Mín.</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="listaProductos">
-                            <tr><td colspan="3" style="text-align:center; color:#94a3b8;">Cargando...</td></tr>
+                            <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -130,7 +149,7 @@
                 const tbody = document.getElementById("listaProductos");
                 
                 if (productos.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No hay productos registrados.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No hay productos registrados.</td></tr>`;
                     return;
                 }
 
@@ -138,12 +157,15 @@
                 productos.forEach(p => {
                     const accion = rolUsuario === "ADMIN" 
                         ? `<button class="btn-danger" onclick="eliminarProducto('${p._id}')">Eliminar</button>` 
-                        : `<span class="readonly-text">Solo lectura</span>`;
+                        : `<span class="readonly-text">Lectura</span>`;
 
                     tbody.innerHTML += `
                         <tr>
-                            <td>${p.nombre}</td>
+                            <td><strong>${p.nombre}</strong><br><small style="color:#64748b;">${p.descripcion || ''}</small></td>
+                            <td>${p.categoria}</td>
                             <td>${p.cantidad}</td>
+                            <td>${p.unidadMedida}</td>
+                            <td>${p.stockMinimo}</td>
                             <td>${accion}</td>
                         </tr>`;
                 });
@@ -158,7 +180,11 @@
 
             const nuevoProd = {
                 nombre: document.getElementById("nombre").value.trim(),
-                cantidad: Number(document.getElementById("cantidad").value)
+                descripcion: document.getElementById("descripcion").value.trim(),
+                categoria: document.getElementById("categoria").value.trim(),
+                cantidad: Number(document.getElementById("cantidad").value),
+                unidadMedida: document.getElementById("unidadMedida").value.trim(),
+                stockMinimo: Number(document.getElementById("stockMinimo").value)
             };
 
             try {
