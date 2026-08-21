@@ -1,105 +1,167 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes | Inventario Zayra</title>
+    <title>Sistema de Inventario - Reportes</title>
+    <!-- Librería SheetJS para exportar a Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { display: flex; min-height: 100vh; background-color: #f4f7f6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
+        
+        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
+        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
+        .sidebar nav a.active { background-color: #334155; color: white; }
+        
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-align: center; }
+        .btn-logout:hover { background-color: #b91c1c; }
 
-        /* Barra lateral */
-        .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { font-size: 20px; margin-bottom: 30px; text-align: center; color: #ecf0f1; }
-        .nav-link { display: block; color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
-        .nav-link:hover { background: #34495e; color: white; }
-        .logout-btn { margin-top: auto; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        
+        .btn-success { background-color: #16a34a; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-success:hover { background-color: #15803d; }
 
-        /* Contenido Principal */
-        .main-content { flex: 1; padding: 40px; }
-        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; margin-bottom: 25px; }
+        .table-container { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
+        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 13px; }
+        th { color: #64748b; font-weight: 600; background-color: #f8fafc; }
 
-        /* Elementos específicos de reportes */
-        .alert-box { background: #fff3cd; color: #856404; padding: 20px; border-radius: 8px; border: 1px solid #ffeeba; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #2c3e50; }
-        .stat-card h3 { font-size: 14px; color: #7f8c8d; margin-bottom: 5px; }
-        .stat-card p { font-size: 22px; font-weight: bold; color: #2c3e50; }
-        .btn-export { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
+        }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <h2>📦 Inventario Zayra</h2>
-        <a href="index.html" class="nav-link">Productos</a>
-        <a href="solicitudes.html" class="nav-link">Solicitudes</a>
-        <a href="reportes.html" class="nav-link" style="background:#34495e; color:white;">Reportes</a>
-        <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <div>
+            <h2>📦 Inventario</h2>
+            <nav>
+                <a href="index.html">Productos</a>
+                <a href="solicitudes.html">Solicitudes</a>
+                <a href="reportes.html" class="active">Reportes</a>
+            </nav>
+        </div>
+        <div>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
     </div>
 
     <div class="main-content">
-        <h1>Reportes y Estadísticas</h1>
-        
-        <div id="contenidoReporte" class="card">
-            <p>Verificando permisos y cargando datos...</p>
+        <div class="header-flex">
+            <h1>📊 Reportes del Sistema</h1>
+            <button class="btn-success" onclick="exportarExcel()">📥 Exportar a Excel</button>
+        </div>
+
+        <div class="card">
+            <h3>Resumen de Solicitudes y Movimientos</h3>
+            <div class="table-container">
+                <table id="tablaReportes">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Solicitante</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaReportes">
+                        <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Cargando reportes...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        const rol = localStorage.getItem("rolUsuario");
+        const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
 
-        // Validar si hay sesión activa
         if (!token) {
             window.location.href = "login.html";
         }
 
-        function cargarReporte() {
-            const contenedor = document.getElementById("contenidoReporte");
-
-            if (rol === "ADMIN") {
-                // Vista exclusiva para Administradores
-                contenedor.innerHTML = `
-                    <h2>Resumen General del Sistema</h2>
-                    <p style="color: #666; margin-bottom: 20px;">Estadísticas en tiempo real de entradas, salidas y stock actual.</p>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Productos Totales</h3>
-                            <p id="totalProductos">--</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Solicitudes Pendientes</h3>
-                            <p id="totalSolicitudes">--</p>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 30px;">
-                        <button class="btn-export" onclick="alert('Generando archivo de exportación...')">Exportar Reporte a Excel</button>
-                    </div>
-                `;
-                
-                // Opcional: Podrías hacer un fetch aquí si tienes una ruta de estadísticas en tu backend
-            } else {
-                // Vista restringida para Empleados comunes
-                contenedor.innerHTML = `
-                    <div class="alert-box">
-                        <h3>Acceso Restringido</h3>
-                        <p>Los reportes estadísticos y ejecutivos solo están disponibles para cuentas con rol de <strong>Administrador</strong>.</p>
-                    </div>
-                `;
-            }
-        }
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarReportes();
+        });
 
         function cerrarSesion() {
             localStorage.clear();
             window.location.href = "login.html";
         }
 
-        cargarReporte();
+        let datosReporteGlobal = []; // Guardamos los datos para usarlos al exportar
+
+        async function cargarReportes() {
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes`, { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                const solicitudes = await res.json();
+                const tbody = document.getElementById("listaReportes");
+
+                if (!Array.isArray(solicitudes) || solicitudes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay datos para mostrar en los reportes.</td></tr>`;
+                    return;
+                }
+
+                datosReporteGlobal = solicitudes; // Almacenamos para el Excel
+                tbody.innerHTML = "";
+
+                solicitudes.forEach(s => {
+                    const nombreProd = s.producto?.nombre || "Producto";
+                    const nombreSolicitante = s.solicitante || s.nombreSolicitante || "N/D";
+                    const fechaFormateada = s.createdAt ? new Date(s.createdAt).toLocaleDateString() : "N/D";
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${nombreProd}</td>
+                            <td>${s.cantidad}</td>
+                            <td>${nombreSolicitante}</td>
+                            <td>${s.estado || 'Pendiente'}</td>
+                            <td>${fechaFormateada}</td>
+                        </tr>`;
+                });
+            } catch (err) {
+                console.error("Error al cargar reportes:", err);
+                document.getElementById("listaReportes").innerHTML = `<tr><td colspan="5" style="text-align:center; color:#dc2626;">Error al cargar los datos del servidor.</td></tr>`;
+            }
+        }
+
+        // Función para exportar los datos a Excel usando SheetJS
+        function exportarExcel() {
+            if (!datosReporteGlobal || datosReporteGlobal.length === 0) {
+                alert("No hay datos disponibles para exportar.");
+                return;
+            }
+
+            // Mapeamos los datos limpios que irán al archivo de Excel
+            const datosLimpios = datosReporteGlobal.map(s => ({
+                Producto: s.producto?.nombre || "Producto",
+                Cantidad: s.cantidad,
+                Solicitante: s.solicitante || s.nombreSolicitante || "N/D",
+                Estado: s.estado || "Pendiente",
+                Fecha: s.createdAt ? new Date(s.createdAt).toLocaleDateString() : "N/D"
+            }));
+
+            // Creamos una hoja de cálculo a partir del arreglo de objetos
+            const worksheet = XLSX.utils.json_to_sheet(datosLimpios);
+            
+            // Creamos un libro de trabajo nuevo
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte de Solicitudes");
+
+            // Forzamos la descarga del archivo Excel (.xlsx)
+            XLSX.writeFile(workbook, "Reporte_Inventario_Solicitudes.xlsx");
+        }
     </script>
 </body>
 </html>
