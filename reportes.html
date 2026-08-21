@@ -1,273 +1,154 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reportes - Sistema Inventario</title>
-  <style>
-    :root {
-      --sidebar-bg: #1e293b;
-      --sidebar-hover: #334155;
-      --sidebar-text: #94a3b8;
-      --sidebar-text-active: #ffffff;
-      --primary-color: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg-color: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --danger: #ef4444;
-      --success: #10b981;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Sistema Inventario</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
+        
+        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
+        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
+        .sidebar nav a.active { background-color: #334155; color: white; }
+        
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        
+        /* Contenedor de tarjetas de estadísticas */
+        .stats-grid { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 200px; text-align: center; }
+        .stat-card h3 { font-size: 14px; color: #64748b; margin-bottom: 10px; }
+        .stat-card p { font-size: 24px; font-weight: bold; color: #1e293b; }
+        
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; }
+        .card h3 { margin-bottom: 15px; color: #1e293b; font-size: 16px; }
 
-    * { box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      margin: 0;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* Barra Lateral */
-    aside {
-      width: 240px;
-      background-color: var(--sidebar-bg);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 20px 15px;
-      color: white;
-    }
-
-    .brand {
-      font-size: 16px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 25px;
-      padding-left: 10px;
-    }
-
-    .menu-links {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      flex-grow: 1;
-    }
-
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      color: var(--sidebar-text);
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-
-    .menu-item:hover, .menu-item.active {
-      background-color: var(--sidebar-hover);
-      color: var(--sidebar-text-active);
-    }
-
-    .sidebar-footer {
-      border-top: 1px solid #334155;
-      padding-top: 15px;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-      padding-left: 5px;
-    }
-
-    .user-avatar {
-      width: 32px; height: 32px;
-      background: var(--primary-color);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: bold; color: white; font-size: 13px;
-    }
-
-    .user-name { font-size: 13px; font-weight: bold; color: white; display: block; }
-    .user-role { font-size: 10px; background: var(--primary-color); color: white; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; }
-
-    .btn-salir {
-      width: 100%; background: transparent; color: #f87171; border: 1px solid #f87171;
-      padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 13px;
-      display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
-    }
-    .btn-salir:hover { background-color: var(--danger); color: white; border-color: var(--danger); }
-
-    /* Contenido Principal */
-    main { flex-grow: 1; padding: 30px; overflow-y: auto; }
-    .main-header { font-size: 20px; font-weight: bold; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
-
-    /* Tarjetas de Estadísticas (KPIs) */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 25px;
-    }
-
-    @media (max-width: 900px) {
-      .kpi-grid { grid-template-columns: 1fr; }
-    }
-
-    .kpi-card {
-      background: var(--card-bg);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .kpi-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-    .kpi-value { font-size: 24px; font-weight: bold; color: var(--text-main); }
-
-    /* Tarjeta de Alertas */
-    .card { background: var(--card-bg); padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-    .card h2 { margin-top: 0; font-size: 16px; margin-bottom: 20px; font-weight: bold; }
-
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-    th { color: var(--text-muted); font-weight: 600; padding: 10px; border-bottom: 1px solid var(--border-color); }
-    td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); }
-
-    .badge-danger { background: #fee2e2; color: #dc2626; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-    .badge-success { background: #dcfce7; color: #16a34a; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-  </style>
+        .table-container { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 400px; }
+        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+        th { color: #64748b; font-weight: 600; }
+        
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
+        }
+    </style>
 </head>
 <body>
-
-  <!-- Barra Lateral -->
-  <aside>
-    <div>
-      <div class="brand"><span>📦</span> Sistema Inventario</div>
-      <div class="menu-links">
-        <a href="index.html" class="menu-item">📦 Productos</a>
-        <a href="solicitudes.html" class="menu-item">📋 Solicitudes</a>
-        <a href="reportes.html" class="menu-item active">📊 Reportes</a>
-      </div>
-    </div>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar" id="avatarLetra">A</div>
-        <div class="user-details">
-          <span class="user-name" id="nombreUsuario">Administrador</span>
-          <span class="user-role" id="rolUsuario">ADMIN</span>
+    <div class="sidebar">
+        <div>
+            <h2>📦 Inventario</h2>
+            <nav>
+                <a href="index.html">Productos</a>
+                <a href="solicitudes.html">Solicitudes</a>
+                <a href="reportes.html" class="active">Reportes</a>
+            </nav>
         </div>
-      </div>
-      <button class="btn-salir" id="btnCerrarSesion">🚪 Cerrar Sesión</button>
     </div>
-  </aside>
+    
+    <div class="main-content">
+        <h1>📊 Reportes y Estadísticas</h1>
+        <br>
 
-  <!-- Panel Principal -->
-  <main>
-    <div class="main-header">📊 Reportes y Estadísticas de Inventario</div>
+        <!-- Tarjetas de Resumen Rápido -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Productos</h3>
+                <p id="totalProductos">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Solicitudes Pendientes</h3>
+                <p id="totalPendientes">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Solicitudes Aprobadas</h3>
+                <p id="totalAprobadas">0</p>
+            </div>
+        </div>
 
-    <!-- KPIs -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <span class="kpi-title">Total de Productos</span>
-        <span class="kpi-value" id="totalProductos">0</span>
-      </div>
-      <div class="kpi-card">
-        <span class="kpi-title">Unidades Totales en Stock</span>
-        <span class="kpi-value" id="totalStock">0</span>
-      </div>
-      <div class="kpi-card">
-        <span class="kpi-title">Alertas de Stock Bajo</span>
-        <span class="kpi-value" id="totalAlertas" style="color: var(--danger);">0</span>
-      </div>
+        <!-- Tabla de Alertas o Stock Bajo -->
+        <div class="card">
+            <h3>Estado General de Solicitudes</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto / Título</th>
+                            <th>Cantidad</th>
+                            <th>Prioridad</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaReportes">
+                        <tr><td colspan="4" style="text-align: center; color: #94a3b8;">Cargando datos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- Tabla de Alertas / Estado del Inventario -->
-    <div class="card">
-      <h2>Estado General y Alertas de Stock</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Categoría</th>
-            <th>Stock Actual</th>
-            <th>Stock Mínimo</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody id="tablaReportes">
-          <!-- Cargado dinámicamente -->
-        </tbody>
-      </table>
-    </div>
-  </main>
+    <script>
+        const API_URL = "https://inventario-backend-mojz.onrender.com";
+        const token = localStorage.getItem("token");
 
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = 'login.html';
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarDatosReporte();
+        });
 
-    async function cargarReportes() {
-      try {
-        const res = await fetch('https://.https://inventario-backend-mojz.onrender.com/api/productos');
-        const productos = await res.json();
+        async function cargarDatosReporte() {
+            try {
+                // 1. Obtener productos y solicitudes en paralelo
+                const [resProd, resSol] = await Promise.all([
+                    fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
 
-        const totalProductos = productos.length;
-        const totalStock = productos.reduce((acc, p) => acc + p.cantidad, 0);
-        let alertasCount = 0;
+                if (!resProd.ok || !resSol.ok) {
+                    console.error("Error al obtener datos del servidor");
+                    return;
+                }
 
-        const tbody = document.getElementById('tablaReportes');
+                const productos = await resProd.json();
+                const solicitudes = await resSol.json();
 
-        if (totalProductos === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b;">No hay datos para mostrar en los reportes.</td></tr>`;
-          return;
+                // 2. Calcular estadísticas
+                const totalProd = productos.length;
+                const pendientes = solicitudes.filter(s => s.estado === 'Pendiente' || !s.estado).length;
+                const aprobadas = solicitudes.filter(s => s.estado === 'Aprobada').length;
+
+                // 3. Pintar estadísticas en las tarjetas
+                document.getElementById("totalProductos").textContent = totalProd;
+                document.getElementById("totalPendientes").textContent = pendientes;
+                document.getElementById("totalAprobadas").textContent = aprobadas;
+
+                // 4. Llenar la tabla resumen
+                const tbody = document.getElementById("tablaReportes");
+                if (solicitudes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">No hay registros para mostrar.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = "";
+                solicitudes.forEach(sol => {
+                    const tr = document.createElement("tr");
+                    const nombreProd = sol.producto?.nombre || sol.titulo || 'Producto';
+                    
+                    tr.innerHTML = `
+                        <td>${nombreProd}</td>
+                        <td>${sol.cantidad || 1}</td>
+                        <td>${sol.prioridad || 'Media'}</td>
+                        <td><strong>${sol.estado || 'Pendiente'}</strong></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error("Error de red:", error);
+                document.getElementById("tablaReportes").innerHTML = `<tr><td colspan="4" style="text-align: center; color: red;">Error al conectar con el servidor.</td></tr>`;
+            }
         }
-
-        tbody.innerHTML = productos.map(p => {
-          const stockBajo = p.cantidad <= p.stockMinimo;
-          if (stockBajo) alertasCount++;
-
-          return `
-            <tr>
-              <td><strong>${p.nombre}</strong></td>
-              <td>${p.categoria}</td>
-              <td>${p.cantidad} ${p.unidadMedida}</td>
-              <td>${p.stockMinimo}</td>
-              <td>
-                ${stockBajo 
-                  ? '<span class="badge-danger">⚠️ Stock Bajo</span>' 
-                  : '<span class="badge-success">✔️ Óptimo</span>'}
-              </td>
-            </tr>
-          `;
-        }).join('');
-
-        document.getElementById('totalProductos').textContent = totalProductos;
-        document.getElementById('totalStock').textContent = totalStock;
-        document.getElementById('totalAlertas').textContent = alertasCount;
-
-      } catch (err) {
-        console.error('Error al cargar reportes:', err);
-      }
-    }
-
-    document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-      localStorage.clear();
-      window.location.href = 'login.html';
-    });
-
-    cargarReportes();
-  </script>
+    </script>
 </body>
 </html>
