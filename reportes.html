@@ -4,26 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes - Sistema Inventario</title>
+    <!-- Librería para exportar a Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
-        
-        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; }
         .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
         .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
         .sidebar nav a.active { background-color: #334155; color: white; }
-        
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
         
-        /* Contenedor de tarjetas de estadísticas */
         .stats-grid { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 200px; text-align: center; }
         .stat-card h3 { font-size: 14px; color: #64748b; margin-bottom: 10px; }
         .stat-card p { font-size: 24px; font-weight: bold; color: #1e293b; }
         
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; }
-        .card h3 { margin-bottom: 15px; color: #1e293b; font-size: 16px; }
-
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        
+        .btn-excel { background-color: #16a34a; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn-excel:hover { background-color: #15803d; }
+        
         .table-container { overflow-x: auto; width: 100%; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 400px; }
         th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
@@ -32,27 +34,24 @@
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; }
-            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <div>
-            <h2>📦 Inventario</h2>
-            <nav>
-                <a href="index.html">Productos</a>
-                <a href="solicitudes.html">Solicitudes</a>
-                <a href="reportes.html" class="active">Reportes</a>
-            </nav>
-        </div>
+        <h2>📦 Inventario</h2>
+        <nav>
+            <a href="index.html">Productos</a>
+            <a href="solicitudes.html">Solicitudes</a>
+            <a href="reportes.html" class="active">Reportes</a>
+        </nav>
     </div>
     
     <div class="main-content">
-        <h1>📊 Reportes y Estadísticas</h1>
+        <h1>📊 Reportes y Estadísticas Avanzadas</h1>
         <br>
 
-        <!-- Tarjetas de Resumen Rápido -->
+        <!-- Tarjetas de Resumen -->
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Total Productos</h3>
@@ -68,14 +67,17 @@
             </div>
         </div>
 
-        <!-- Tabla de Alertas o Stock Bajo -->
+        <!-- Tarjeta con Botón de Exportar a Excel -->
         <div class="card">
-            <h3>Estado General de Solicitudes</h3>
+            <div class="card-header">
+                <h3>Historial General de Solicitudes</h3>
+                <button class="btn-excel" onclick="exportarExcel()">📥 Descargar en Excel</button>
+            </div>
             <div class="table-container">
-                <table>
+                <table id="tablaReportesExcel">
                     <thead>
                         <tr>
-                            <th>Producto / Título</th>
+                            <th>Producto</th>
                             <th>Cantidad</th>
                             <th>Prioridad</th>
                             <th>Estado</th>
@@ -92,6 +94,7 @@
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
+        let solicitudesGlobales = [];
 
         document.addEventListener("DOMContentLoaded", () => {
             cargarDatosReporte();
@@ -99,42 +102,30 @@
 
         async function cargarDatosReporte() {
             try {
-                // 1. Obtener productos y solicitudes en paralelo
                 const [resProd, resSol] = await Promise.all([
                     fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } }),
                     fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
 
-                if (!resProd.ok || !resSol.ok) {
-                    console.error("Error al obtener datos del servidor");
-                    return;
-                }
+                if (!resProd.ok || !resSol.ok) return;
 
                 const productos = await resProd.json();
-                const solicitudes = await resSol.json();
+                solicitudesGlobales = await resSol.json();
 
-                // 2. Calcular estadísticas
-                const totalProd = productos.length;
-                const pendientes = solicitudes.filter(s => s.estado === 'Pendiente' || !s.estado).length;
-                const aprobadas = solicitudes.filter(s => s.estado === 'Aprobada').length;
+                document.getElementById("totalProductos").textContent = productos.length;
+                document.getElementById("totalPendientes").textContent = solicitudesGlobales.filter(s => s.estado === 'Pendiente' || !s.estado).length;
+                document.getElementById("totalAprobadas").textContent = solicitudesGlobales.filter(s => s.estado === 'Aprobada').length;
 
-                // 3. Pintar estadísticas en las tarjetas
-                document.getElementById("totalProductos").textContent = totalProd;
-                document.getElementById("totalPendientes").textContent = pendientes;
-                document.getElementById("totalAprobadas").textContent = aprobadas;
-
-                // 4. Llenar la tabla resumen
                 const tbody = document.getElementById("tablaReportes");
-                if (solicitudes.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">No hay registros para mostrar.</td></tr>`;
+                if (solicitudesGlobales.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">No hay registros.</td></tr>`;
                     return;
                 }
 
                 tbody.innerHTML = "";
-                solicitudes.forEach(sol => {
+                solicitudesGlobales.forEach(sol => {
                     const tr = document.createElement("tr");
                     const nombreProd = sol.producto?.nombre || sol.titulo || 'Producto';
-                    
                     tr.innerHTML = `
                         <td>${nombreProd}</td>
                         <td>${sol.cantidad || 1}</td>
@@ -143,11 +134,16 @@
                     `;
                     tbody.appendChild(tr);
                 });
-
             } catch (error) {
-                console.error("Error de red:", error);
-                document.getElementById("tablaReportes").innerHTML = `<tr><td colspan="4" style="text-align: center; color: red;">Error al conectar con el servidor.</td></tr>`;
+                console.error("Error:", error);
             }
+        }
+
+        // Función para exportar la tabla a Excel
+        function exportarExcel() {
+            const tabla = document.getElementById("tablaReportesExcel");
+            const libro = XLSX.utils.table_to_book(tabla, { sheet: "Reporte Solicitudes" });
+            XLSX.writeFile(libro, "Reporte_Inventario_Solicitudes.xlsx");
         }
     </script>
 </body>
