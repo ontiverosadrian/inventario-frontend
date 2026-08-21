@@ -3,155 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario - Sistema</title>
+    <title>Inventario - Sistema de Gestión</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-        body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f7f6; }
         
-        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
-        .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
-        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
-        .sidebar nav a.active { background-color: #334155; color: white; }
+        /* Sidebar */
+        .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; }
+        .sidebar h2 { font-size: 20px; margin-bottom: 30px; text-align: center; }
+        .nav-link { display: block; color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; }
+        .nav-link:hover { background: #34495e; color: white; }
         
-        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-align: center; }
-        .btn-logout:hover { background-color: #b91c1c; }
-
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .search-box { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; }
+        /* Contenido */
+        .main-content { flex: 1; padding: 30px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
-        .alert-card { background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin-bottom: 20px; border-radius: 4px; display: none; }
-        .alert-card h4 { color: #991b1b; margin-bottom: 5px; font-size: 15px; }
-        .alert-card p { color: #7f1d1d; font-size: 14px; }
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 15px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
         
-        .table-container { overflow-x: auto; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 400px; }
-        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
-        th { color: #64748b; font-weight: 600; }
+        /* Botones */
+        button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background: #e74c3c; color: white; }
+        .btn-add { background: #27ae60; color: white; }
         
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; }
-            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
-        }
+        /* Control de Visibilidad */
+        .admin-only { display: none; }
     </style>
 </head>
 <body>
+
     <div class="sidebar">
-        <div>
-            <h2>📦 Inventario</h2>
-            <nav>
-                <a href="index.html" class="active">Productos</a>
-                <a href="solicitudes.html">Solicitudes</a>
-                <a href="reportes.html">Reportes</a>
-            </nav>
-        </div>
-        <div>
-            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
-        </div>
+        <h2>📦 Inventario Zayra</h2>
+        <a href="index.html" class="nav-link">Productos</a>
+        <a href="solicitudes.html" class="nav-link">Solicitudes</a>
+        <a href="reportes.html" class="nav-link">Reportes</a>
+        <button onclick="cerrarSesion()" style="width:100%; margin-top:50px; background:transparent; color:#e74c3c; border:1px solid #e74c3c;">Cerrar Sesión</button>
     </div>
-    
+
     <div class="main-content">
-        <h1>📦 Productos Disponibles</h1>
+        <h1>Productos Disponibles</h1>
         <br>
 
-        <div id="alertaStockBajo" class="alert-card">
-            <h4>⚠️ ¡Atención! Hay productos con stock crítico</h4>
-            <p id="textoAlerta">Revisa los elementos marcados en la lista.</p>
+        <!-- Panel de Administración (Solo visible para ADMIN) -->
+        <div id="adminPanel" class="card admin-only">
+            <h3>Administrar Productos</h3>
+            <div style="margin-top:10px;">
+                <input type="text" id="nombre" placeholder="Nombre del producto" style="padding:8px;">
+                <input type="number" id="cantidad" placeholder="Stock inicial" style="padding:8px;">
+                <button class="btn-add" onclick="guardarProducto()">Guardar Producto</button>
+            </div>
         </div>
 
         <div class="card">
-            <input type="text" id="inputBuscar" class="search-box" placeholder="🔍 Buscar producto por nombre..." onkeyup="filtrarProductos()">
-            
-            <div class="table-container">
-                <table id="tablaProductos">
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Stock</th>
-                            <th>Unidad</th>
-                        </tr>
-                    </thead>
-                    <tbody id="listaProductos">
-                        <tr><td colspan="3" style="text-align:center; color:#94a3b8;">Cargando productos...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Stock</th>
+                        <th class="admin-header">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="listaProductos">
+                    <tr><td colspan="3">Cargando productos...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
+        const rol = localStorage.getItem("rolUsuario");
 
-        if (!token) {
-            window.location.href = "login.html";
+        // 1. Verificar si el usuario ha iniciado sesión
+        if (!token) window.location.href = "login.html";
+
+        // 2. Mostrar controles de Admin si es necesario
+        if (rol === "ADMIN") {
+            document.getElementById("adminPanel").style.display = "block";
         }
 
-        let productosGlobales = [];
+        // 3. Cargar productos desde el servidor
+        async function cargarProductos() {
+            const res = await fetch(`${API_URL}/api/productos`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const productos = await res.json();
+            const lista = document.getElementById("listaProductos");
+            
+            lista.innerHTML = productos.map(p => `
+                <tr>
+                    <td>${p.nombre}</td>
+                    <td>${p.cantidad}</td>
+                    <td>
+                        ${rol === "ADMIN" ? `
+                            <button class="btn-delete" onclick="eliminarProducto('${p._id}')">Eliminar</button>
+                        ` : '<span style="color:#7f8c8d;">Solo lectura</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
 
-        document.addEventListener("DOMContentLoaded", () => {
+        // 4. Guardar producto (Solo Admin)
+        async function guardarProducto() {
+            const nombre = document.getElementById("nombre").value;
+            const cantidad = document.getElementById("cantidad").value;
+
+            await fetch(`${API_URL}/api/productos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ nombre, cantidad })
+            });
+            alert("Producto guardado");
             cargarProductos();
-        });
+        }
+
+        // 5. Eliminar producto (Solo Admin)
+        async function eliminarProducto(id) {
+            if(rol !== "ADMIN") return;
+            if(!confirm("¿Eliminar producto?")) return;
+
+            await fetch(`${API_URL}/api/productos/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            cargarProductos();
+        }
 
         function cerrarSesion() {
             localStorage.clear();
             window.location.href = "login.html";
         }
 
-        async function cargarProductos() {
-            try {
-                const response = await fetch(`${API_URL}/api/productos`, { 
-                    headers: { 'Authorization': `Bearer ${token}` } 
-                });
-
-                if (!response.ok) {
-                    if (response.status === 401 || response.status === 403) {
-                        cerrarSesion();
-                        return;
-                    }
-                    document.getElementById("listaProductos").innerHTML = `<tr><td colspan="3" style="text-align:center; color:red;">Error al cargar datos.</td></tr>`;
-                    return;
-                }
-
-                productosGlobales = await response.json();
-                renderizarTabla(productosGlobales);
-                verificarStockBajo(productosGlobales);
-            } catch (err) { 
-                console.error("Error de red:", err); 
-            }
-        }
-
-        function renderizarTabla(productos) {
-            const tbody = document.getElementById("listaProductos");
-            if (productos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No se encontraron productos.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = productos.map(p => `
-                <tr style="${p.cantidad <= 5 ? 'background-color: #fff1f2;' : ''}">
-                    <td>${p.nombre}</td>
-                    <td><strong>${p.cantidad}</strong> ${p.cantidad <= 5 ? '⚠️ (Bajo)' : ''}</td>
-                    <td>${p.unidadMedida || 'Unidad'}</td>
-                </tr>
-            `).join('');
-        }
-
-        function filtrarProductos() {
-            const texto = document.getElementById("inputBuscar").value.toLowerCase();
-            const filtrados = productosGlobales.filter(p => p.nombre.toLowerCase().includes(texto));
-            renderizarTabla(filtrados);
-        }
-
-        function verificarStockBajo(productos) {
-            const bajos = productos.filter(p => p.cantidad <= 5);
-            const alerta = document.getElementById("alertaStockBajo");
-            if (bajos.length > 0) {
-                alerta.style.display = "block";
-                document.getElementById("textoAlerta").textContent = `Hay ${bajos.length} producto(s) con 5 unidades o menos disponibles para reposición.`;
-            }
-        }
+        cargarProductos();
     </script>
 </body>
 </html>

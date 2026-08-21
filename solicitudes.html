@@ -3,245 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Inventario - Solicitudes</title>
+    <title>Solicitudes | Inventario Zayra</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-        body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
-        
-        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
-        .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
-        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
-        .sidebar nav a.active { background-color: #334155; color: white; }
-        
-        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-align: center; }
-        .btn-logout:hover { background-color: #b91c1c; }
+        /* Estilos Generales */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f7f6; }
 
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .content-grid { display: flex; gap: 20px; flex-wrap: wrap; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        /* Barra lateral */
+        .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { font-size: 20px; margin-bottom: 30px; text-align: center; color: #ecf0f1; }
+        .nav-link { display: block; color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
+        .nav-link:hover { background: #34495e; color: white; }
+        .logout-btn { margin-top: auto; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; }
+
+        /* Contenido Principal */
+        .main-content { flex: 1; padding: 40px; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; margin-bottom: 20px; }
+
+        /* Tabla */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #f8f9fa; color: #34495e; text-align: left; padding: 15px; border-bottom: 2px solid #dee2e6; }
+        td { padding: 15px; border-bottom: 1px solid #dee2e6; }
         
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; color: #475569; font-size: 14px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
-        .form-group textarea { resize: vertical; height: 80px; }
-        
-        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
-        .btn-primary:hover { background-color: #1d4ed8; }
-        .btn-danger { background-color: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        
-        .table-container { overflow-x: auto; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
-        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
-        th { color: #64748b; font-weight: 600; }
-        
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; }
-            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
-        }
+        /* Botones */
+        .btn-aprob { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-rech { background: #c0392b; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .status-pill { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div>
-            <h2>📦 Inventario</h2>
-            <nav>
-                <a href="index.html">Productos</a>
-                <a href="solicitudes.html" class="active">Solicitudes</a>
-                <a href="reportes.html">Reportes</a>
-            </nav>
-        </div>
-        <div>
-            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
-        </div>
+        <h2>📦 Inventario Zayra</h2>
+        <a href="index.html" class="nav-link">Productos</a>
+        <a href="solicitudes.html" class="nav-link" style="background:#34495e; color:white;">Solicitudes</a>
+        <a href="reportes.html" class="nav-link">Reportes</a>
+        <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
     </div>
 
     <div class="main-content">
-        <h1>📋 Gestión de Solicitudes</h1>
-        <br>
-        <div class="content-grid">
-            <div class="card">
-                <h3>Nueva Solicitud</h3>
-                <form id="solicitudForm">
-                    <div class="form-group">
-                        <label>Producto</label>
-                        <select id="productoSelect" required>
-                            <option value="">Cargando productos...</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Cantidad</label>
-                        <input type="number" id="cantidad" min="1" required placeholder="Ej. 2">
-                    </div>
-                    <div class="form-group">
-                        <label>Nombre del Solicitante</label>
-                        <input type="text" id="solicitante" required placeholder="Ej. Juan Pérez">
-                    </div>
-                    <div class="form-group">
-                        <label>Observaciones</label>
-                        <textarea id="descripcion" placeholder="Detalles..."></textarea>
-                    </div>
-                    <button type="submit" class="btn-primary">Crear Solicitud</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <h3>Solicitudes Registradas</h3>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cant.</th>
-                                <th>Solicitante</th>
-                                <th>Estado</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaSolicitudes">
-                            <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Cargando...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <h1>Gestión de Solicitudes</h1>
+        <div class="card">
+            <table id="tablaSolicitudes">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Solicitante</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="lista">
+                    <tr><td colspan="4" style="text-align:center;">Cargando solicitudes...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
-        const rolUsuario = localStorage.getItem("rolUsuario") || "USER";
+        const rol = localStorage.getItem("rolUsuario");
 
-        if (!token) {
-            window.location.href = "login.html";
+        // Validar sesión
+        if (!token) window.location.href = "login.html";
+
+        async function cargarSolicitudes() {
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!res.ok) throw new Error("Error al obtener solicitudes");
+                const sol = await res.json();
+                const lista = document.getElementById("lista");
+                
+                if (sol.length === 0) {
+                    lista.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay solicitudes pendientes.</td></tr>';
+                    return;
+                }
+
+                lista.innerHTML = sol.map(s => `
+                    <tr>
+                        <td>${s.titulo}</td>
+                        <td>${s.solicitante}</td>
+                        <td><span class="status-pill">${s.estado}</span></td>
+                        <td>
+                            ${rol === "ADMIN" ? `
+                                <button class="btn-aprob" onclick="cambiarEstado('${s._id}', 'Aprobada')">Aprobar</button>
+                                <button class="btn-rech" onclick="cambiarEstado('${s._id}', 'Rechazada')">Rechazar</button>
+                            ` : '<span style="color:#7f8c8d; font-size:12px;">Solo lectura</span>'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error(error);
+                alert("No se pudieron cargar las solicitudes.");
+            }
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            cargarProductosEnSelect();
-            cargarSolicitudes();
-        });
+        async function cambiarEstado(id, nuevoEstado) {
+            if (rol !== "ADMIN") return;
+
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                if (res.ok) {
+                    cargarSolicitudes();
+                } else {
+                    alert("Error al actualizar estado. Verifica permisos.");
+                }
+            } catch (error) {
+                alert("Error de conexión con el servidor.");
+            }
+        }
 
         function cerrarSesion() {
             localStorage.clear();
             window.location.href = "login.html";
         }
 
-        async function cargarProductosEnSelect() {
-            try {
-                const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
-                const productos = await res.json();
-                const select = document.getElementById("productoSelect");
-                select.innerHTML = `<option value="">Selecciona un producto...</option>`;
-                productos.forEach(p => {
-                    select.innerHTML += `<option value="${p._id}">${p.nombre} (Stock: ${p.cantidad})</option>`;
-                });
-            } catch (err) { console.error(err); }
-        }
-
-        async function cargarSolicitudes() {
-            try {
-                const res = await fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
-                const solicitudes = await res.json();
-                const tbody = document.getElementById("tablaSolicitudes");
-                
-                if (solicitudes.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay solicitudes.</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = "";
-                solicitudes.forEach(sol => {
-                    const nombreProd = sol.producto?.nombre || sol.titulo || 'Producto';
-                    
-                    const celdaEstado = rolUsuario === "ADMIN" 
-                        ? `<select onchange="cambiarEstado('${sol._id}', this.value)">
-                             <option value="Pendiente" ${sol.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                             <option value="Aprobada" ${sol.estado === 'Aprobada' ? 'selected' : ''}>Aprobada</option>
-                             <option value="Rechazada" ${sol.estado === 'Rechazada' ? 'selected' : ''}>Rechazada</option>
-                           </select>`
-                        : `<span>${sol.estado || 'Pendiente'}</span>`;
-
-                    const accion = rolUsuario === "ADMIN" 
-                        ? `<button class="btn-danger" onclick="eliminarSolicitud('${sol._id}')">Eliminar</button>` 
-                        : `-`;
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${nombreProd}</td>
-                            <td>${sol.cantidad}</td>
-                            <td>${sol.solicitante || 'N/D'}</td>
-                            <td>${celdaEstado}</td>
-                            <td>${accion}</td>
-                        </tr>`;
-                });
-            } catch (err) { console.error(err); }
-        }
-
-        async function cambiarEstado(id, nuevoEstado) {
-            if (rolUsuario !== "ADMIN") {
-                alert("No tienes permisos para realizar esta acción.");
-                return;
-            }
-            const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ estado: nuevoEstado })
-            });
-            if (res.ok) {
-                alert("Estado actualizado");
-                cargarSolicitudes();
-            } else {
-                alert("Error al actualizar el estado");
-            }
-        }
-
-        async function eliminarSolicitud(id) {
-            if (rolUsuario !== "ADMIN") {
-                alert("No tienes permisos para eliminar.");
-                return;
-            }
-            if (!confirm("¿Eliminar solicitud?")) return;
-            const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                cargarSolicitudes();
-            } else {
-                alert("Error al eliminar");
-            }
-        }
-
-        document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const select = document.getElementById("productoSelect");
-            const nueva = {
-                producto: select.value,
-                titulo: select.options[select.selectedIndex].text,
-                cantidad: Number(document.getElementById("cantidad").value),
-                solicitante: document.getElementById("solicitante").value,
-                descripcion: document.getElementById("descripcion").value
-            };
-
-            const res = await fetch(`${API_URL}/api/solicitudes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(nueva)
-            });
-
-            if (res.ok) {
-                alert("¡Solicitud creada y stock descontado!");
-                document.getElementById("solicitudForm").reset();
-                cargarProductosEnSelect();
-                cargarSolicitudes();
-            } else {
-                const err = await res.json();
-                alert(err.mensaje || "Error al crear");
-            }
-        });
+        cargarSolicitudes();
     </script>
 </body>
 </html>
