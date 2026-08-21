@@ -2,67 +2,71 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Inventario</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Inventario</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f6f9; display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; }
-        .sidebar a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; }
-        .main-content { flex: 1; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #cbd5e1; }
-        button { background-color: #2563eb; color: white; padding: 10px; border: none; cursor: pointer; width: 100%; }
-        .admin-only { display: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
+        
+        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
+        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
+        .sidebar nav a.active { background-color: #334155; color: white; }
+        
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-align: center; }
+        .btn-logout:hover { background-color: #b91c1c; }
+
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .content-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        
+        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; text-align: center; text-decoration: none; display: inline-block; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- Barra lateral -->
     <div class="sidebar">
-        <h2>📦 Inventario</h2>
-        <a href="index.html">Productos</a>
-        <a href="solicitudes.html">Solicitudes</a>
-        <button onclick="localStorage.clear(); location.reload();" style="background:#dc2626; margin-top:20px;">Cerrar Sesión</button>
-    </div>
-    <div class="main-content">
-        <h1>Gestión de Productos</h1>
-        <div id="adminPanel" class="card admin-only">
-            <h3>Nuevo Producto</h3>
-            <form id="productoForm">
-                <input type="text" id="nombre" placeholder="Nombre" required>
-                <input type="number" id="cantidad" placeholder="Cantidad" required>
-                <button type="submit">Guardar Producto</button>
-            </form>
+        <div>
+            <h2>📦 Inventario</h2>
+            <nav>
+                <a href="index.html" class="active">Inicio</a>
+                <a href="productos.html">Gestión Productos</a>
+                <a href="solicitudes.html">Solicitudes</a>
+                <a href="reportes.html">Reportes</a>
+            </nav>
         </div>
-        <div class="card">
-            <table width="100%">
-                <thead><tr><th>Nombre</th><th>Stock</th></tr></thead>
-                <tbody id="listaProductos"></tbody>
-            </table>
+        <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <h1 style="font-size: 22px; color: #1e293b; margin-bottom: 20px;">Panel Principal</h1>
+
+        <div class="content-grid">
+            <div class="card">
+                <h3 style="font-size: 16px; color: #1e293b; margin-bottom: 10px;">Bienvenido al Sistema</h3>
+                <p style="color: #475569; font-size: 14px; margin-bottom: 20px;">Utiliza el menú lateral para navegar entre la gestión de productos, solicitudes y reportes del inventario.</p>
+                <a href="productos.html" class="btn-primary">Ir a Productos</a>
+            </div>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
-        if (localStorage.getItem("rolUsuario") === "ADMIN") document.getElementById("adminPanel").style.display = "block";
+        if (!token) window.location.href = "login.html";
 
-        async function cargarProductos() {
-            const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
-            const data = await res.json();
-            const tbody = document.getElementById("listaProductos");
-            tbody.innerHTML = data.map(p => `<tr><td>${p.nombre}</td><td>${p.cantidad}</td></tr>`).join('');
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = "login.html";
         }
-
-        document.getElementById("productoForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const res = await fetch(`${API_URL}/api/productos`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ nombre: document.getElementById("nombre").value, cantidad: Number(document.getElementById("cantidad").value) })
-            });
-            const data = await res.json();
-            if (res.ok) { alert("¡Guardado!"); cargarProductos(); }
-            else { alert("Error: " + (data.mensaje || JSON.stringify(data))); }
-        });
-        cargarProductos();
     </script>
 </body>
 </html>
