@@ -5,102 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos | Inventario</title>
     <style>
-        :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --primary: #0f172a;
-            --accent: #3b82f6;
-            --danger: #ef4444;
-            --radius: 8px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f7f6; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 40px; }
+        /* Barra lateral */
+        .sidebar { width: 260px; background: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar h2 { font-size: 18px; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; color: #f8fafc; }
+        .nav-link { display: block; color: #94a3b8; text-decoration: none; padding: 12px; border-radius: 6px; margin-bottom: 5px; transition: 0.2s; font-size: 14px; }
+        .nav-link:hover { background: #334155; color: white; }
+        .nav-link.active { background: #334155; color: white; font-weight: 500; }
+        .logout-btn { margin-top: auto; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: opacity 0.2s; }
+        .logout-btn:hover { opacity: 0.9; }
 
-        /* Navegación sutil */
-        nav { display: flex; gap: 20px; align-items: center; margin-bottom: 40px; background: var(--card-bg); padding: 15px 24px; border-radius: var(--radius); border: 1px solid var(--border-color); }
-        nav a { text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 14px; transition: color 0.2s; }
-        nav a:hover, nav a.active { color: var(--accent); }
-        .nav-logout { margin-left: auto; background: none; border: none; color: var(--danger); cursor: pointer; font-weight: 500; font-size: 14px; }
+        /* Contenido Principal */
+        .main-content { flex: 1; padding: 40px; overflow-x: auto; }
+        .header-title { font-size: 24px; color: #1e293b; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
 
-        h1 { font-size: 24px; font-weight: 600; margin-bottom: 24px; color: var(--primary); }
+        /* Estructura de dos columnas */
+        .grid-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
+        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
 
-        /* Contenedor de dos columnas */
-        .layout-grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
-        @media (max-width: 768px) { .layout-grid { grid-template-columns: 1fr; } }
+        .card { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h3 { font-size: 16px; color: #1e293b; margin-bottom: 16px; font-weight: 600; }
 
-        /* Tarjetas minimalistas */
-        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; }
-        .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--primary); }
+        /* Formularios */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 500; }
+        .form-group input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .form-group input:focus { border-color: #3b82f6; }
 
-        /* Formulario */
-        .field { margin-bottom: 16px; }
-        .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
-        .field input { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
-        .field input:focus { border-color: var(--accent); }
+        .btn-submit { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s; }
+        .btn-submit:hover { background: #1d4ed8; }
+
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+        th { color: #64748b; font-weight: 600; padding: 12px 8px; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; }
         
-        .btn-submit { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 500; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
-        .btn-submit:hover { opacity: 0.9; }
-
-        /* Tabla estilizada */
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th { background: #f1f5f9; color: var(--text-muted); font-weight: 600; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
-        tr:last-child td { border-bottom: none; }
-
-        .btn-action { background: none; border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--danger); transition: background 0.2s; }
-        .btn-action:hover { background: #fef2f2; border-color: #fca5a5; }
+        .btn-delete { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; }
+        .btn-delete:hover { background: #fee2e2; }
         
-        .readonly-text { font-size: 13px; color: var(--text-muted); }
         .admin-only { display: none; }
+        .readonly-text { font-size: 13px; color: #94a3b8; }
     </style>
 </head>
 <body>
 
-    <nav>
-        <a href="index.html">Inicio</a>
-        <a href="productos.html" class="active">Productos</a>
-        <a href="solicitudes.html">Solicitudes</a>
-        <a href="reportes.html">Reportes</a>
-        <button class="nav-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
-    </nav>
+    <!-- Barra lateral -->
+    <div class="sidebar">
+        <h2>📦 Inventario</h2>
+        <a href="index.html" class="nav-link">Productos (Inicio)</a>
+        <a href="productos.html" class="nav-link active">Gestión Productos</a>
+        <a href="solicitudes.html" class="nav-link">Solicitudes</a>
+        <a href="reportes.html" class="nav-link">Reportes</a>
+        <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
 
-    <h1>Inventario de Productos</h1>
+    <!-- Contenido principal -->
+    <div class="main-content">
+        <h1 class="header-title">📋 Gestión de Productos</h1>
 
-    <div class="layout-grid">
-        <!-- Cuadro de entrada (Formulario) -->
-        <div id="adminPanel" class="card admin-only">
-            <h3>Nuevo Producto</h3>
-            <div class="field">
-                <label>Nombre</label>
-                <input type="text" id="nombre" placeholder="Ej. Artículo A">
+        <div class="grid-layout">
+            <!-- Formulario (Izquierda) -->
+            <div id="adminPanel" class="card admin-only">
+                <h3>Nuevo Producto</h3>
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="nombre" placeholder="Ej. Taladro percutor">
+                </div>
+                <div class="form-group">
+                    <label>Cantidad / Stock</label>
+                    <input type="number" id="cantidad" placeholder="Ej. 5">
+                </div>
+                <button class="btn-submit" onclick="guardarProducto()">Guardar Producto</button>
             </div>
-            <div class="field">
-                <label>Cantidad</label>
-                <input type="number" id="cantidad" placeholder="0">
-            </div>
-            <button class="btn-submit" onclick="guardarProducto()">Guardar Producto</button>
-        </div>
 
-        <!-- Tabla de información -->
-        <div class="card">
-            <h3>Listado General</h3>
-            <div style="overflow-x: auto; margin-top: 16px;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Stock</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="listaProductos">
-                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Cargando registros...</td></tr>
-                    </tbody>
-                </table>
+            <!-- Tabla (Derecha) -->
+            <div class="card">
+                <h3>Productos Registrados</h3>
+                <div style="overflow-x: auto; margin-top: 10px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Stock</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaProductos">
+                            <tr><td colspan="3" style="text-align: center; color: #94a3b8;">Cargando registros...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -122,7 +118,7 @@
                 const lista = document.getElementById("listaProductos");
                 
                 if (productos.length === 0) {
-                    lista.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No hay productos registrados.</td></tr>';
+                    lista.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #94a3b8;">No hay productos registrados.</td></tr>';
                     return;
                 }
 
@@ -131,7 +127,7 @@
                         <td>${p.nombre}</td>
                         <td>${p.cantidad}</td>
                         <td>
-                            ${rol === "ADMIN" ? `<button class="btn-action" onclick="eliminarProducto('${p._id}')">Eliminar</button>` : '<span class="readonly-text">Solo lectura</span>'}
+                            ${rol === "ADMIN" ? `<button class="btn-delete" onclick="eliminarProducto('${p._id}')">Eliminar</button>` : '<span class="readonly-text">Solo lectura</span>'}
                         </td>
                     </tr>
                 `).join('');
@@ -145,7 +141,7 @@
             const cantidad = document.getElementById("cantidad").value.trim();
 
             if (!nombre || !cantidad) {
-                alert("Por favor completa los campos");
+                alert("Completa todos los campos");
                 return;
             }
 
