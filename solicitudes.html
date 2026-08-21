@@ -113,6 +113,10 @@
         const token = localStorage.getItem("token");
         const rolUsuario = localStorage.getItem("rolUsuario") || "USER";
 
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             cargarProductosEnSelect();
             cargarSolicitudes();
@@ -126,6 +130,7 @@
         async function cargarProductosEnSelect() {
             try {
                 const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
                 const productos = await res.json();
                 const select = document.getElementById("productoSelect");
                 select.innerHTML = `<option value="">Selecciona un producto...</option>`;
@@ -138,6 +143,7 @@
         async function cargarSolicitudes() {
             try {
                 const res = await fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
                 const solicitudes = await res.json();
                 const tbody = document.getElementById("tablaSolicitudes");
                 
@@ -149,6 +155,7 @@
                 tbody.innerHTML = "";
                 solicitudes.forEach(sol => {
                     const nombreProd = sol.producto?.nombre || sol.titulo || 'Producto';
+                    
                     const celdaEstado = rolUsuario === "ADMIN" 
                         ? `<select onchange="cambiarEstado('${sol._id}', this.value)">
                              <option value="Pendiente" ${sol.estado === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
@@ -174,22 +181,38 @@
         }
 
         async function cambiarEstado(id, nuevoEstado) {
-            await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
+            if (rolUsuario !== "ADMIN") {
+                alert("No tienes permisos para realizar esta acción.");
+                return;
+            }
+            const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ estado: nuevoEstado })
             });
-            alert("Estado actualizado");
-            cargarSolicitudes();
+            if (res.ok) {
+                alert("Estado actualizado");
+                cargarSolicitudes();
+            } else {
+                alert("Error al actualizar el estado");
+            }
         }
 
         async function eliminarSolicitud(id) {
+            if (rolUsuario !== "ADMIN") {
+                alert("No tienes permisos para eliminar.");
+                return;
+            }
             if (!confirm("¿Eliminar solicitud?")) return;
-            await fetch(`${API_URL}/api/solicitudes/${id}`, {
+            const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            cargarSolicitudes();
+            if (res.ok) {
+                cargarSolicitudes();
+            } else {
+                alert("Error al eliminar");
+            }
         }
 
         document.getElementById("solicitudForm").addEventListener("submit", async (e) => {

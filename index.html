@@ -17,7 +17,6 @@
         .btn-logout:hover { background-color: #b91c1c; }
 
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        
         .search-box { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; }
         
@@ -84,6 +83,11 @@
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
+
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
         let productosGlobales = [];
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -102,6 +106,10 @@
                 });
 
                 if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        cerrarSesion();
+                        return;
+                    }
                     document.getElementById("listaProductos").innerHTML = `<tr><td colspan="3" style="text-align:center; color:red;">Error al cargar datos.</td></tr>`;
                     return;
                 }

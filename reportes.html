@@ -103,6 +103,10 @@
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
 
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             cargarDatosReporte();
         });
@@ -119,7 +123,10 @@
                     fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } })
                 ]);
 
-                if (!resProd.ok || !resSol.ok) return;
+                if (!resProd.ok || !resSol.ok) {
+                    if (resProd.status === 401 || resSol.status === 401) cerrarSesion();
+                    return;
+                }
 
                 const productos = await resProd.json();
                 const solicitudes = await resSol.json();
@@ -151,7 +158,7 @@
             }
         }
 
-        function exportarExcel() {
+        export function exportarExcel() {
             const tabla = document.getElementById("tablaReportesExcel");
             const libro = XLSX.utils.table_to_book(tabla, { sheet: "Reporte Solicitudes" });
             XLSX.writeFile(libro, "Reporte_Inventario_Solicitudes.xlsx");
