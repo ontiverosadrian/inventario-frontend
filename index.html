@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio - Inventario</title>
+    <title>Sistema de Inventario - Productos</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
@@ -20,8 +20,21 @@
         .content-grid { display: flex; gap: 20px; flex-wrap: wrap; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
         
-        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; text-align: center; text-decoration: none; display: inline-block; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #475569; font-size: 14px; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
+        
+        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
         .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-danger { background-color: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        
+        .table-container { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
+        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+        th { color: #64748b; font-weight: 600; }
+        
+        .admin-only { display: none; }
+        .readonly-text { font-size: 13px; color: #94a3b8; }
 
         @media (max-width: 768px) {
             body { flex-direction: column; }
@@ -32,40 +45,165 @@
 </head>
 <body>
 
-    <!-- Barra lateral -->
     <div class="sidebar">
         <div>
             <h2>📦 Inventario</h2>
             <nav>
-                <a href="index.html" class="active">Inicio</a>
-                <a href="productos.html">Gestión Productos</a>
+                <a href="index.html" class="active">Productos</a>
                 <a href="solicitudes.html">Solicitudes</a>
                 <a href="reportes.html">Reportes</a>
             </nav>
         </div>
-        <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <div>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
     </div>
 
-    <!-- Contenido principal -->
     <div class="main-content">
-        <h1 style="font-size: 22px; color: #1e293b; margin-bottom: 20px;">Panel Principal</h1>
-
+        <h1>📋 Gestión de Productos</h1>
+        <br>
         <div class="content-grid">
+            <!-- Formulario de nuevo producto (Visible solo para ADMIN) -->
+            <div id="adminPanel" class="card admin-only">
+                <h3>Nuevo Producto</h3>
+                <form id="productoForm">
+                    <div class="form-group">
+                        <label>Nombre del Producto</label>
+                        <input type="text" id="nombre" required placeholder="Ej. Taladro">
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad / Stock</label>
+                        <input type="number" id="cantidad" min="0" required placeholder="Ej. 10">
+                    </div>
+                    <button type="submit" class="btn-primary">Guardar Producto</button>
+                </form>
+            </div>
+
+            <!-- Tabla de productos -->
             <div class="card">
-                <h3 style="font-size: 16px; color: #1e293b; margin-bottom: 10px;">Bienvenido al Sistema</h3>
-                <p style="color: #475569; font-size: 14px; margin-bottom: 20px;">Utiliza el menú lateral para navegar entre la gestión de productos, solicitudes y reportes del inventario.</p>
-                <a href="productos.html" class="btn-primary">Ir a Productos</a>
+                <h3>Productos Registrados</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Stock</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaProductos">
+                            <tr><td colspan="3" style="text-align:center; color:#94a3b8;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
-        if (!token) window.location.href = "login.html";
+        const rolUsuario = localStorage.getItem("rolUsuario") || "USER";
+
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        if (rolUsuario === "ADMIN") {
+            document.getElementById("adminPanel").style.display = "block";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarProductos();
+        });
 
         function cerrarSesion() {
             localStorage.clear();
             window.location.href = "login.html";
+        }
+
+        async function cargarProductos() {
+            try {
+                const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
+                const productos = await res.json();
+                const tbody = document.getElementById("listaProductos");
+                
+                if (productos.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No hay productos registrados.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = "";
+                productos.forEach(p => {
+                    const accion = rolUsuario === "ADMIN" 
+                        ? `<button class="btn-danger" onclick="eliminarProducto('${p._id}')">Eliminar</button>` 
+                        : `<span class="readonly-text">Solo lectura</span>`;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${p.nombre}</td>
+                            <td>${p.cantidad}</td>
+                            <td>${accion}</td>
+                        </tr>`;
+                });
+            } catch (err) { 
+                console.error(err); 
+            }
+        }
+
+        document.getElementById("productoForm")?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (rolUsuario !== "ADMIN") return;
+
+            const nuevoProd = {
+                nombre: document.getElementById("nombre").value.trim(),
+                cantidad: Number(document.getElementById("cantidad").value)
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/productos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(nuevoProd)
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert("¡Producto guardado exitosamente!");
+                    document.getElementById("productoForm").reset();
+                    cargarProductos();
+                } else {
+                    alert("Error: " + (data.mensaje || "No se pudo guardar el producto"));
+                }
+            } catch (err) {
+                alert("Error de red: " + err.message);
+            }
+        });
+
+        async function eliminarProducto(id) {
+            if (rolUsuario !== "ADMIN") {
+                alert("No tienes permisos para eliminar.");
+                return;
+            }
+            if (!confirm("¿Deseas eliminar este producto?")) return;
+
+            try {
+                const res = await fetch(`${API_URL}/api/productos/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    cargarProductos();
+                } else {
+                    const data = await res.json();
+                    alert("Error al eliminar: " + (data.mensaje || "Desconocido"));
+                }
+            } catch (err) {
+                alert("Error de red: " + err.message);
+            }
         }
     </script>
 </body>
