@@ -3,59 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Productos</title>
-    <!-- Importamos una fuente estilo manuscrito/cursivo similar a la de tu imagen -->
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Sistema de Inventario - Productos</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
         
-        /* Barra lateral oscura */
-        .sidebar { width: 260px; background-color: #1e293b; color: white; padding: 25px 20px; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
-        .sidebar h2 { font-size: 20px; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
-        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; font-size: 15px; transition: 0.2s; }
-        .sidebar nav a:hover, .sidebar nav a.active { background-color: #334155; color: white; }
+        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
+        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
+        .sidebar nav a.active { background-color: #334155; color: white; }
         
-        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; text-align: center; }
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-align: center; }
         .btn-logout:hover { background-color: #b91c1c; }
 
-        /* Contenido principal */
-        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
-        .page-title { font-family: 'Caveat', cursive; font-size: 38px; color: #1e293b; margin-bottom: 30px; display: flex; align-items: center; gap: 12px; }
-
-        /* Estructura de dos columnas */
-        .content-grid { display: grid; grid-template-columns: 420px 1fr; gap: 30px; align-items: start; }
-        @media (max-width: 1024px) { .content-grid { grid-template-columns: 1fr; } }
-
-        /* Tarjetas blancas redondeadas */
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #e2e8f0; }
-        .card h3 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 20px; }
-
-        /* Campos de formulario */
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; color: #64748b; font-size: 14px; font-weight: 500; }
-        .form-group input, .form-group select { width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
-        .form-group input:focus { border-color: #2563eb; }
+        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
+        .content-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
         
-        .btn-primary { background-color: #2563eb; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; font-size: 15px; transition: background 0.2s; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #475569; font-size: 14px; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
+        
+        .btn-primary { background-color: #2563eb; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
         .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-danger { background-color: #dc2626; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         
-        .btn-danger { background-color: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
-        .btn-danger:hover { background-color: #fee2e2; }
-
-        /* Tablas */
-        .table-container { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th { color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-        td { padding: 15px 10px; border-bottom: 1px solid #f1f5f9; color: #334155; font-size: 14px; }
+        .table-container { overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 450px; }
+        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+        th { color: #64748b; font-weight: 600; }
         
         .admin-only { display: none; }
-        .readonly-text { font-size: 13px; color: #94a3b8; font-style: italic; }
+        .readonly-text { font-size: 13px; color: #94a3b8; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; }
+            .sidebar nav { display: flex; flex-wrap: wrap; gap: 10px; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Barra lateral -->
     <div class="sidebar">
         <div>
             <h2>📦 Inventario</h2>
@@ -65,32 +54,32 @@
                 <a href="reportes.html">Reportes</a>
             </nav>
         </div>
-        <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <div>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
     </div>
 
-    <!-- Contenido principal -->
     <div class="main-content">
-        <h1 class="page-title">📋 Gestión de Productos</h1>
-
+        <h1>📋 Gestión de Productos</h1>
+        <br>
         <div class="content-grid">
-            <!-- Formulario / Izquierda (Visible solo para ADMIN) -->
+            <!-- Formulario de nuevo producto (Visible solo para ADMIN) -->
             <div id="adminPanel" class="card admin-only">
                 <h3>Nuevo Producto</h3>
-                
-                <div class="form-group">
-                    <label>Nombre del Producto</label>
-                    <input type="text" id="nombre" placeholder="Ej. Taladro percutor">
-                </div>
-
-                <div class="form-group">
-                    <label>Cantidad / Stock</label>
-                    <input type="number" id="cantidad" placeholder="Ej. 10">
-                </div>
-
-                <button class="btn-primary" onclick="guardarProducto()">Crear Producto</button>
+                <form id="productoForm">
+                    <div class="form-group">
+                        <label>Nombre del Producto</label>
+                        <input type="text" id="nombre" required placeholder="Ej. Taladro">
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad / Stock</label>
+                        <input type="number" id="cantidad" min="0" required placeholder="Ej. 10">
+                    </div>
+                    <button type="submit" class="btn-primary">Guardar Producto</button>
+                </form>
             </div>
 
-            <!-- Tabla / Derecha -->
+            <!-- Tabla de productos -->
             <div class="card">
                 <h3>Productos Registrados</h3>
                 <div class="table-container">
@@ -99,11 +88,11 @@
                             <tr>
                                 <th>Nombre</th>
                                 <th>Stock</th>
-                                <th>Acción</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="listaProductos">
-                            <tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 30px;">Cargando registros...</td></tr>
+                            <tr><td colspan="3" style="text-align:center; color:#94a3b8;">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -114,64 +103,82 @@
     <script>
         const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
-        const rol = localStorage.getItem("rolUsuario");
+        const rolUsuario = localStorage.getItem("rolUsuario") || "USER";
 
-        if (!token) window.location.href = "login.html";
-        if (rol === "ADMIN") document.getElementById("adminPanel").style.display = "block";
+        if (!token) {
+            window.location.href = "login.html";
+        }
+
+        if (rolUsuario === "ADMIN") {
+            document.getElementById("adminPanel").style.display = "block";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarProductos();
+        });
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
 
         async function cargarProductos() {
             try {
-                const res = await fetch(`${API_URL}/api/productos`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) { if (res.status === 401) cerrarSesion(); return; }
                 const productos = await res.json();
-                const lista = document.getElementById("listaProductos");
+                const tbody = document.getElementById("listaProductos");
                 
                 if (productos.length === 0) {
-                    lista.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 30px;">No hay productos registrados.</td></tr>';
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#94a3b8;">No hay productos registrados.</td></tr>`;
                     return;
                 }
 
-                lista.innerHTML = productos.map(p => `
-                    <tr>
-                        <td><strong>${p.nombre}</strong></td>
-                        <td>${p.cantidad}</td>
-                        <td>
-                            ${rol === "ADMIN" ? `<button class="btn-danger" onclick="eliminarProducto('${p._id}')">Eliminar</button>` : '<span class="readonly-text">Solo lectura</span>'}
-                        </td>
-                    </tr>
-                `).join('');
-            } catch (err) {
-                console.error(err);
-            }
+                tbody.innerHTML = "";
+                productos.forEach(p => {
+                    const accion = rolUsuario === "ADMIN" 
+                        ? `<button class="btn-danger" onclick="eliminarProducto('${p._id}')">Eliminar</button>` 
+                        : `<span class="readonly-text">Solo lectura</span>`;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${p.nombre}</td>
+                            <td>${p.cantidad}</td>
+                            <td>${accion}</td>
+                        </tr>`;
+                });
+            } catch (err) { console.error(err); }
         }
 
-        async function guardarProducto() {
-            const nombre = document.getElementById("nombre").value.trim();
-            const cantidad = document.getElementById("cantidad").value.trim();
+        document.getElementById("productoForm")?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (rolUsuario !== "ADMIN") return;
 
-            if (!nombre || !cantidad) {
-                alert("Completa todos los campos");
-                return;
-            }
+            const nuevoProd = {
+                nombre: document.getElementById("nombre").value,
+                cantidad: Number(document.getElementById("cantidad").value)
+            };
 
             const res = await fetch(`${API_URL}/api/productos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ nombre, cantidad })
+                body: JSON.stringify(nuevoProd)
             });
 
             if (res.ok) {
-                document.getElementById("nombre").value = "";
-                document.getElementById("cantidad").value = "";
+                alert("¡Producto guardado exitosamente!");
+                document.getElementById("productoForm").reset();
                 cargarProductos();
             } else {
                 alert("Error al guardar el producto");
             }
-        }
+        });
 
         async function eliminarProducto(id) {
-            if (rol !== "ADMIN") return;
+            if (rolUsuario !== "ADMIN") {
+                alert("No tienes permisos para eliminar.");
+                return;
+            }
             if (!confirm("¿Deseas eliminar este producto?")) return;
 
             const res = await fetch(`${API_URL}/api/productos/${id}`, {
@@ -179,15 +186,12 @@
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            if (res.ok) cargarProductos();
+            if (res.ok) {
+                cargarProductos();
+            } else {
+                alert("Error al eliminar el producto");
+            }
         }
-
-        function cerrarSesion() {
-            localStorage.clear();
-            window.location.href = "login.html";
-        }
-
-        cargarProductos();
     </script>
 </body>
 </html>
