@@ -1,105 +1,61 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes | Inventario Zayra</title>
+    <title>Reportes</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { display: flex; min-height: 100vh; background-color: #f4f7f6; }
-
-        /* Barra lateral */
-        .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { font-size: 20px; margin-bottom: 30px; text-align: center; color: #ecf0f1; }
-        .nav-link { display: block; color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
-        .nav-link:hover { background: #34495e; color: white; }
-        .logout-btn { margin-top: auto; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-
-        /* Contenido Principal */
-        .main-content { flex: 1; padding: 40px; }
-        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; margin-bottom: 25px; }
-
-        /* Elementos específicos de reportes */
-        .alert-box { background: #fff3cd; color: #856404; padding: 20px; border-radius: 8px; border: 1px solid #ffeeba; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .stat-card { background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #2c3e50; }
-        .stat-card h3 { font-size: 14px; color: #7f8c8d; margin-bottom: 5px; }
-        .stat-card p { font-size: 22px; font-weight: bold; color: #2c3e50; }
-        .btn-export { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { padding: 20px; background: #f4f4f9; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .alert { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; border: 1px solid #f5c6cb; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>📦 Inventario Zayra</h2>
-        <a href="index.html" class="nav-link">Productos</a>
-        <a href="solicitudes.html" class="nav-link">Solicitudes</a>
-        <a href="reportes.html" class="nav-link" style="background:#34495e; color:white;">Reportes</a>
-        <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
-    </div>
+    <nav>
+        <a href="index.html">Inicio</a>
+        <a href="productos.html">Productos</a>
+        <a href="solicitudes.html">Solicitudes</a>
+        <a href="reportes.html">Reportes</a>
+        <button onclick="cerrarSesion()" style="float: right; background: #6c757d; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+    </nav>
 
-    <div class="main-content">
-        <h1>Reportes y Estadísticas</h1>
-        
-        <div id="contenidoReporte" class="card">
-            <p>Verificando permisos y cargando datos...</p>
-        </div>
+    <h1>Reportes</h1>
+    <br>
+
+    <div class="card" id="contenidoReporte">
+        <p>Cargando información...</p>
     </div>
 
     <script>
         const rol = localStorage.getItem("rolUsuario");
         const token = localStorage.getItem("token");
 
-        // Validar si hay sesión activa
-        if (!token) {
-            window.location.href = "login.html";
-        }
+        if (!token) window.location.href = "login.html";
 
-        function cargarReporte() {
-            const contenedor = document.getElementById("contenidoReporte");
+        const contenedor = document.getElementById("contenidoReporte");
 
-            if (rol === "ADMIN") {
-                // Vista exclusiva para Administradores
-                contenedor.innerHTML = `
-                    <h2>Resumen General del Sistema</h2>
-                    <p style="color: #666; margin-bottom: 20px;">Estadísticas en tiempo real de entradas, salidas y stock actual.</p>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Productos Totales</h3>
-                            <p id="totalProductos">--</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Solicitudes Pendientes</h3>
-                            <p id="totalSolicitudes">--</p>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 30px;">
-                        <button class="btn-export" onclick="alert('Generando archivo de exportación...')">Exportar Reporte a Excel</button>
-                    </div>
-                `;
-                
-                // Opcional: Podrías hacer un fetch aquí si tienes una ruta de estadísticas en tu backend
-            } else {
-                // Vista restringida para Empleados comunes
-                contenedor.innerHTML = `
-                    <div class="alert-box">
-                        <h3>Acceso Restringido</h3>
-                        <p>Los reportes estadísticos y ejecutivos solo están disponibles para cuentas con rol de <strong>Administrador</strong>.</p>
-                    </div>
-                `;
-            }
+        if (rol === "ADMIN") {
+            contenedor.innerHTML = `
+                <h3>Panel de Reportes Generales</h3>
+                <p style="margin-top: 10px; color: #555;">Aquí puedes consultar las estadísticas del sistema, movimientos de stock y exportar datos.</p>
+                <button onclick="alert('Exportando datos...')" style="margin-top: 15px; padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Exportar Reporte</button>
+            `;
+        } else {
+            contenedor.innerHTML = `
+                <div class="alert">
+                    <strong>Acceso Restringido:</strong> Esta sección de reportes está disponible únicamente para cuentas de Administrador.
+                </div>
+            `;
         }
 
         function cerrarSesion() {
             localStorage.clear();
             window.location.href = "login.html";
         }
-
-        cargarReporte();
     </script>
 </body>
 </html>

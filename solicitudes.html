@@ -3,62 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitudes | Inventario Zayra</title>
+    <title>Solicitudes</title>
     <style>
-        /* Estilos Generales */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { display: flex; min-height: 100vh; background-color: #f4f7f6; }
-
-        /* Barra lateral */
-        .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { font-size: 20px; margin-bottom: 30px; text-align: center; color: #ecf0f1; }
-        .nav-link { display: block; color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; transition: 0.3s; }
-        .nav-link:hover { background: #34495e; color: white; }
-        .logout-btn { margin-top: auto; padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; }
-
-        /* Contenido Principal */
-        .main-content { flex: 1; padding: 40px; }
-        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; margin-bottom: 20px; }
-
-        /* Tabla */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #f8f9fa; color: #34495e; text-align: left; padding: 15px; border-bottom: 2px solid #dee2e6; }
-        td { padding: 15px; border-bottom: 1px solid #dee2e6; }
-        
-        /* Botones */
-        .btn-aprob { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .btn-rech { background: #c0392b; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-        .status-pill { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { padding: 20px; background: #f4f4f9; }
+        nav { margin-bottom: 20px; }
+        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #f8f9fa; }
+        button { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+        .btn-aprob { background: #28a745; }
+        .btn-rech { background: #dc3545; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>📦 Inventario Zayra</h2>
-        <a href="index.html" class="nav-link">Productos</a>
-        <a href="solicitudes.html" class="nav-link" style="background:#34495e; color:white;">Solicitudes</a>
-        <a href="reportes.html" class="nav-link">Reportes</a>
-        <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
-    </div>
+    <nav>
+        <a href="index.html">Productos</a>
+        <a href="solicitudes.html">Solicitudes</a>
+        <button onclick="cerrarSesion()" style="float: right; background: #6c757d; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">Cerrar Sesión</button>
+    </nav>
 
-    <div class="main-content">
-        <h1>Gestión de Solicitudes</h1>
-        <div class="card">
-            <table id="tablaSolicitudes">
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Solicitante</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="lista">
-                    <tr><td colspan="4" style="text-align:center;">Cargando solicitudes...</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <h1>Solicitudes</h1>
+    <br>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Solicitante</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="listaSolicitudes">
+                <tr><td colspan="4">Cargando...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -66,7 +50,6 @@
         const token = localStorage.getItem("token");
         const rol = localStorage.getItem("rolUsuario");
 
-        // Validar sesión
         if (!token) window.location.href = "login.html";
 
         async function cargarSolicitudes() {
@@ -74,55 +57,48 @@
                 const res = await fetch(`${API_URL}/api/solicitudes`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                const solicitudes = await res.json();
+                const lista = document.getElementById("listaSolicitudes");
                 
-                if (!res.ok) throw new Error("Error al obtener solicitudes");
-                const sol = await res.json();
-                const lista = document.getElementById("lista");
-                
-                if (sol.length === 0) {
-                    lista.innerHTML = '<tr><td colspan="4" style="text-align:center;">No hay solicitudes pendientes.</td></tr>';
+                if (solicitudes.length === 0) {
+                    lista.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay solicitudes.</td></tr>';
                     return;
                 }
 
-                lista.innerHTML = sol.map(s => `
+                lista.innerHTML = solicitudes.map(s => `
                     <tr>
                         <td>${s.titulo}</td>
                         <td>${s.solicitante}</td>
-                        <td><span class="status-pill">${s.estado}</span></td>
+                        <td><strong>${s.estado}</strong></td>
                         <td>
                             ${rol === "ADMIN" ? `
                                 <button class="btn-aprob" onclick="cambiarEstado('${s._id}', 'Aprobada')">Aprobar</button>
                                 <button class="btn-rech" onclick="cambiarEstado('${s._id}', 'Rechazada')">Rechazar</button>
-                            ` : '<span style="color:#7f8c8d; font-size:12px;">Solo lectura</span>'}
+                            ` : '<span style="color: #666; font-size: 13px;">Solo lectura</span>'}
                         </td>
                     </tr>
                 `).join('');
-            } catch (error) {
-                console.error(error);
-                alert("No se pudieron cargar las solicitudes.");
+            } catch (err) {
+                console.error(err);
             }
         }
 
         async function cambiarEstado(id, nuevoEstado) {
             if (rol !== "ADMIN") return;
 
-            try {
-                const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'Authorization': `Bearer ${token}` 
-                    },
-                    body: JSON.stringify({ estado: nuevoEstado })
-                });
+            const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ estado: nuevoEstado })
+            });
 
-                if (res.ok) {
-                    cargarSolicitudes();
-                } else {
-                    alert("Error al actualizar estado. Verifica permisos.");
-                }
-            } catch (error) {
-                alert("Error de conexión con el servidor.");
+            if (res.ok) {
+                cargarSolicitudes();
+            } else {
+                alert("Error al actualizar estado");
             }
         }
 
