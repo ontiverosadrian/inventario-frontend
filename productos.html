@@ -3,22 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Productos</title>
+    <title>Productos | Inventario</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; background: #f4f4f9; }
-        nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
-        .container { display: flex; gap: 20px; align-items: flex-start; }
-        .form-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 300px; }
-        .table-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; }
-        .form-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; background: #28a745; color: white; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        .btn-delete { background: #dc3545; color: white; padding: 5px 10px; width: auto; }
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --radius: 8px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 40px; }
+
+        /* Navegación sutil */
+        nav { display: flex; gap: 20px; align-items: center; margin-bottom: 40px; background: var(--card-bg); padding: 15px 24px; border-radius: var(--radius); border: 1px solid var(--border-color); }
+        nav a { text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 14px; transition: color 0.2s; }
+        nav a:hover, nav a.active { color: var(--accent); }
+        .nav-logout { margin-left: auto; background: none; border: none; color: var(--danger); cursor: pointer; font-weight: 500; font-size: 14px; }
+
+        h1 { font-size: 24px; font-weight: 600; margin-bottom: 24px; color: var(--primary); }
+
+        /* Contenedor de dos columnas */
+        .layout-grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+        @media (max-width: 768px) { .layout-grid { grid-template-columns: 1fr; } }
+
+        /* Tarjetas minimalistas */
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; }
+        .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--primary); }
+
+        /* Formulario */
+        .field { margin-bottom: 16px; }
+        .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+        .field input { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        .field input:focus { border-color: var(--accent); }
+        
+        .btn-submit { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 500; font-size: 14px; cursor: pointer; transition: opacity 0.2s; }
+        .btn-submit:hover { opacity: 0.9; }
+
+        /* Tabla estilizada */
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th { background: #f1f5f9; color: var(--text-muted); font-weight: 600; padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+        tr:last-child td { border-bottom: none; }
+
+        .btn-action { background: none; border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--danger); transition: background 0.2s; }
+        .btn-action:hover { background: #fef2f2; border-color: #fca5a5; }
+        
+        .readonly-text { font-size: 13px; color: var(--text-muted); }
         .admin-only { display: none; }
     </style>
 </head>
@@ -26,45 +62,46 @@
 
     <nav>
         <a href="index.html">Inicio</a>
-        <a href="productos.html">Productos</a>
+        <a href="productos.html" class="active">Productos</a>
         <a href="solicitudes.html">Solicitudes</a>
         <a href="reportes.html">Reportes</a>
-        <button onclick="cerrarSesion()" style="float: right; background: #6c757d; width: auto;">Cerrar Sesión</button>
+        <button class="nav-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
     </nav>
 
-    <h1>Gestión de Productos</h1>
-    <br>
+    <h1>Inventario de Productos</h1>
 
-    <div class="container">
-        <!-- Cuadro para ingresar información (Visible solo para ADMIN o según prefieras) -->
-        <div id="adminPanel" class="form-card admin-only">
-            <h3>Agregar Producto</h3>
-            <div class="form-group" style="margin-top: 15px;">
-                <label>Nombre:</label>
-                <input type="text" id="nombre" placeholder="Ej. Martillo">
+    <div class="layout-grid">
+        <!-- Cuadro de entrada (Formulario) -->
+        <div id="adminPanel" class="card admin-only">
+            <h3>Nuevo Producto</h3>
+            <div class="field">
+                <label>Nombre</label>
+                <input type="text" id="nombre" placeholder="Ej. Artículo A">
             </div>
-            <div class="form-group">
-                <label>Cantidad:</label>
-                <input type="number" id="cantidad" placeholder="Ej. 10">
+            <div class="field">
+                <label>Cantidad</label>
+                <input type="number" id="cantidad" placeholder="0">
             </div>
-            <button onclick="guardarProducto()">Guardar</button>
+            <button class="btn-submit" onclick="guardarProducto()">Guardar Producto</button>
         </div>
 
-        <!-- Tabla con la información al lado -->
-        <div class="table-card">
-            <h3>Lista de Productos</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Cantidad</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="listaProductos">
-                    <tr><td colspan="3">Cargando...</td></tr>
-                </tbody>
-            </table>
+        <!-- Tabla de información -->
+        <div class="card">
+            <h3>Listado General</h3>
+            <div style="overflow-x: auto; margin-top: 16px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaProductos">
+                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Cargando registros...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -84,12 +121,17 @@
                 const productos = await res.json();
                 const lista = document.getElementById("listaProductos");
                 
+                if (productos.length === 0) {
+                    lista.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No hay productos registrados.</td></tr>';
+                    return;
+                }
+
                 lista.innerHTML = productos.map(p => `
                     <tr>
                         <td>${p.nombre}</td>
                         <td>${p.cantidad}</td>
                         <td>
-                            ${rol === "ADMIN" ? `<button class="btn-delete" onclick="eliminarProducto('${p._id}')">Eliminar</button>` : 'Solo lectura'}
+                            ${rol === "ADMIN" ? `<button class="btn-action" onclick="eliminarProducto('${p._id}')">Eliminar</button>` : '<span class="readonly-text">Solo lectura</span>'}
                         </td>
                     </tr>
                 `).join('');
@@ -99,8 +141,13 @@
         }
 
         async function guardarProducto() {
-            const nombre = document.getElementById("nombre").value;
-            const cantidad = document.getElementById("cantidad").value;
+            const nombre = document.getElementById("nombre").value.trim();
+            const cantidad = document.getElementById("cantidad").value.trim();
+
+            if (!nombre || !cantidad) {
+                alert("Por favor completa los campos");
+                return;
+            }
 
             const res = await fetch(`${API_URL}/api/productos`, {
                 method: 'POST',
@@ -113,13 +160,13 @@
                 document.getElementById("cantidad").value = "";
                 cargarProductos();
             } else {
-                alert("Error al guardar");
+                alert("Error al guardar el producto");
             }
         }
 
         async function eliminarProducto(id) {
             if (rol !== "ADMIN") return;
-            if (!confirm("¿Eliminar producto?")) return;
+            if (!confirm("¿Deseas eliminar este producto?")) return;
 
             const res = await fetch(`${API_URL}/api/productos/${id}`, {
                 method: 'DELETE',
