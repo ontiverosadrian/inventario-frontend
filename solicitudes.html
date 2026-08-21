@@ -130,7 +130,10 @@
 
         async function cargarProductosSelect() {
             try {
-                const res = await fetch(`${API_URL}/api/productos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                // Se agrega ?t=${Date.now()} para evitar caché del navegador
+                const res = await fetch(`${API_URL}/api/productos?t=${Date.now()}`, { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
                 const productos = await res.json();
                 const select = document.getElementById("productoSelect");
                 
@@ -145,7 +148,9 @@
 
         async function cargarSolicitudes() {
             try {
-                const res = await fetch(`${API_URL}/api/solicitudes`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const res = await fetch(`${API_URL}/api/solicitudes?t=${Date.now()}`, { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
                 const solicitudes = await res.json();
                 const tbody = document.getElementById("listaSolicitudes");
 
@@ -205,8 +210,8 @@
                 if (res.ok) {
                     alert("¡Solicitud creada exitosamente!");
                     document.getElementById("solicitudForm").reset();
-                    cargarSolicitudes();
-                    cargarProductosSelect(); // Actualiza el stock en el selector
+                    await cargarSolicitudes();
+                    await cargarProductosSelect(); // Forzar actualización de stock
                 } else {
                     alert("Error: " + (data.mensaje || "No se pudo crear la solicitud"));
                 }
@@ -242,8 +247,8 @@
                 });
 
                 if (res.ok) {
-                    cargarSolicitudes();
-                    cargarProductosSelect(); // Actualiza el stock en el selector al eliminar
+                    await cargarSolicitudes();
+                    await cargarProductosSelect(); // Forzar actualización del stock reflejado en el selector
                 } else {
                     const data = await res.json();
                     alert("Error al eliminar: " + (data.mensaje || "Desconocido"));
