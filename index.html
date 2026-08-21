@@ -8,17 +8,19 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
         
-        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; }
+        .sidebar { width: 250px; background-color: #1e293b; color: white; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
         .sidebar h2 { font-size: 18px; margin-bottom: 30px; }
         .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 10px; margin-bottom: 5px; border-radius: 5px; }
         .sidebar nav a.active { background-color: #334155; color: white; }
         
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; text-align: center; }
+        .btn-logout:hover { background-color: #b91c1c; }
+
         .main-content { flex: 1; padding: 20px; overflow-y: auto; }
         
         .search-box { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; width: 100%; }
         
-        /* Alerta de stock bajo */
         .alert-card { background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin-bottom: 20px; border-radius: 4px; display: none; }
         .alert-card h4 { color: #991b1b; margin-bottom: 5px; font-size: 15px; }
         .alert-card p { color: #7f1d1d; font-size: 14px; }
@@ -37,26 +39,29 @@
 </head>
 <body>
     <div class="sidebar">
-        <h2>📦 Inventario</h2>
-        <nav>
-            <a href="index.html" class="active">Productos</a>
-            <a href="solicitudes.html">Solicitudes</a>
-            <a href="reportes.html">Reportes</a>
-        </nav>
+        <div>
+            <h2>📦 Inventario</h2>
+            <nav>
+                <a href="index.html" class="active">Productos</a>
+                <a href="solicitudes.html">Solicitudes</a>
+                <a href="reportes.html">Reportes</a>
+            </nav>
+        </div>
+        <div>
+            <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
     </div>
     
     <div class="main-content">
         <h1>📦 Productos Disponibles</h1>
         <br>
 
-        <!-- Alerta de Stock Bajo -->
         <div id="alertaStockBajo" class="alert-card">
             <h4>⚠️ ¡Atención! Hay productos con stock crítico</h4>
             <p id="textoAlerta">Revisa los elementos marcados en la lista.</p>
         </div>
 
         <div class="card">
-            <!-- Barra de Búsqueda -->
             <input type="text" id="inputBuscar" class="search-box" placeholder="🔍 Buscar producto por nombre..." onkeyup="filtrarProductos()">
             
             <div class="table-container">
@@ -84,6 +89,11 @@
         document.addEventListener("DOMContentLoaded", () => {
             cargarProductos();
         });
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
 
         async function cargarProductos() {
             try {
