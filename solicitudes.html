@@ -157,7 +157,9 @@
                 tbody.innerHTML = "";
                 solicitudes.forEach(s => {
                     const nombreProd = s.producto?.nombre || "Producto";
-                    const nombreSolicitante = s.solicitante || s.nombreSolicitante || "N/D";
+                    
+                    // Lee de manera segura el nombre del solicitante de cualquier propiedad posible
+                    const nombreSolicitante = s.solicitante || s.nombreSolicitante || s.usuario || s.nombre || "N/D";
 
                     const accion = rolUsuario === "ADMIN" 
                         ? `<button class="btn-danger" onclick="eliminarSolicitud('${s._id}')">Eliminar</button>` 
@@ -214,7 +216,6 @@
             }
         });
 
-        // Corregido para apuntar a la ruta /:id/estado que definiste en tu backend
         async function actualizarEstado(id, nuevoEstado) {
             try {
                 const res = await fetch(`${API_URL}/api/solicitudes/${id}/estado`, {
