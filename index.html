@@ -3,141 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario - Sistema de Gestión</title>
+    <title>Panel Principal - Inventario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { display: flex; min-height: 100vh; background-color: #f4f7f6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { display: flex; min-height: 100vh; background-color: #f4f6f9; }
         
-        /* Sidebar */
-        .sidebar { width: 260px; background: #2c3e50; color: white; padding: 20px; }
-        .sidebar h2 { font-size: 20px; margin-bottom: 30px; text-align: center; }
-        .nav-link { display: block; color: #bdc3c7; text-decoration: none; padding: 12px; border-radius: 5px; margin-bottom: 5px; }
-        .nav-link:hover { background: #34495e; color: white; }
+        .sidebar { width: 260px; background-color: #1e293b; color: white; padding: 25px 20px; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
+        .sidebar h2 { font-size: 20px; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .sidebar nav a { display: block; color: #94a3b8; text-decoration: none; padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; font-size: 15px; transition: 0.2s; }
+        .sidebar nav a:hover, .sidebar nav a.active { background-color: #334155; color: white; }
         
-        /* Contenido */
-        .main-content { flex: 1; padding: 30px; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        
-        /* Tablas */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 15px; border-bottom: 1px solid #ddd; text-align: left; }
-        th { background: #f8f9fa; }
-        
-        /* Botones */
-        button { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-delete { background: #e74c3c; color: white; }
-        .btn-add { background: #27ae60; color: white; }
-        
-        /* Control de Visibilidad */
-        .admin-only { display: none; }
+        .btn-logout { background-color: #dc2626; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; text-align: center; }
+        .btn-logout:hover { background-color: #b91c1c; }
+
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+        .page-title { font-family: 'Caveat', cursive; font-size: 38px; color: #1e293b; margin-bottom: 30px; display: flex; align-items: center; gap: 12px; }
+
+        .content-grid { display: grid; grid-template-columns: 1fr; gap: 30px; max-width: 600px; }
+
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #e2e8f0; }
+        .card h3 { font-family: 'Poppins', sans-serif; font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 15px; }
+        .card p { color: #64748b; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+
+        .btn-primary { background-color: #2563eb; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; font-size: 15px; text-align: center; text-decoration: none; display: inline-block; transition: background 0.2s; }
+        .btn-primary:hover { background-color: #1d4ed8; }
     </style>
 </head>
 <body>
 
+    <!-- Barra lateral -->
     <div class="sidebar">
-        <h2>📦 Inventario Zayra</h2>
-        <a href="index.html" class="nav-link">Productos</a>
-        <a href="solicitudes.html" class="nav-link">Solicitudes</a>
-        <a href="reportes.html" class="nav-link">Reportes</a>
-        <button onclick="cerrarSesion()" style="width:100%; margin-top:50px; background:transparent; color:#e74c3c; border:1px solid #e74c3c;">Cerrar Sesión</button>
+        <div>
+            <h2>📦 Inventario</h2>
+            <nav>
+                <a href="index.html" class="active">Productos</a>
+                <a href="solicitudes.html">Solicitudes</a>
+                <a href="reportes.html">Reportes</a>
+            </nav>
+        </div>
+        <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
     </div>
 
+    <!-- Contenido principal -->
     <div class="main-content">
-        <h1>Productos Disponibles</h1>
-        <br>
+        <h1 class="page-title">🏠 Panel Principal</h1>
 
-        <!-- Panel de Administración (Solo visible para ADMIN) -->
-        <div id="adminPanel" class="card admin-only">
-            <h3>Administrar Productos</h3>
-            <div style="margin-top:10px;">
-                <input type="text" id="nombre" placeholder="Nombre del producto" style="padding:8px;">
-                <input type="number" id="cantidad" placeholder="Stock inicial" style="padding:8px;">
-                <button class="btn-add" onclick="guardarProducto()">Guardar Producto</button>
+        <div class="content-grid">
+            <div class="card">
+                <h3>Bienvenido al Sistema</h3>
+                <p>Utiliza el menú lateral izquierdo para acceder rápidamente a la gestión de productos, revisar y autorizar solicitudes, o ver los reportes del inventario.</p>
+                <a href="productos.html" class="btn-primary">Ver Productos</a>
             </div>
-        </div>
-
-        <div class="card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Stock</th>
-                        <th class="admin-header">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="listaProductos">
-                    <tr><td colspan="3">Cargando productos...</td></tr>
-                </tbody>
-            </table>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://inventario-backend-mojz.onrender.com";
         const token = localStorage.getItem("token");
-        const rol = localStorage.getItem("rolUsuario");
-
-        // 1. Verificar si el usuario ha iniciado sesión
         if (!token) window.location.href = "login.html";
-
-        // 2. Mostrar controles de Admin si es necesario
-        if (rol === "ADMIN") {
-            document.getElementById("adminPanel").style.display = "block";
-        }
-
-        // 3. Cargar productos desde el servidor
-        async function cargarProductos() {
-            const res = await fetch(`${API_URL}/api/productos`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const productos = await res.json();
-            const lista = document.getElementById("listaProductos");
-            
-            lista.innerHTML = productos.map(p => `
-                <tr>
-                    <td>${p.nombre}</td>
-                    <td>${p.cantidad}</td>
-                    <td>
-                        ${rol === "ADMIN" ? `
-                            <button class="btn-delete" onclick="eliminarProducto('${p._id}')">Eliminar</button>
-                        ` : '<span style="color:#7f8c8d;">Solo lectura</span>'}
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // 4. Guardar producto (Solo Admin)
-        async function guardarProducto() {
-            const nombre = document.getElementById("nombre").value;
-            const cantidad = document.getElementById("cantidad").value;
-
-            await fetch(`${API_URL}/api/productos`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ nombre, cantidad })
-            });
-            alert("Producto guardado");
-            cargarProductos();
-        }
-
-        // 5. Eliminar producto (Solo Admin)
-        async function eliminarProducto(id) {
-            if(rol !== "ADMIN") return;
-            if(!confirm("¿Eliminar producto?")) return;
-
-            await fetch(`${API_URL}/api/productos/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            cargarProductos();
-        }
 
         function cerrarSesion() {
             localStorage.clear();
             window.location.href = "login.html";
         }
-
-        cargarProductos();
     </script>
 </body>
 </html>
