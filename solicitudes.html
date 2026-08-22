@@ -134,8 +134,8 @@
 
             tbody.innerHTML = "";
             solicitudes.forEach(s => {
-                // Lectura blindada para mostrar el nombre del solicitante correctamente
-                const nombreSolicitante = s.solicitante || s.nombreSolicitante || s.usuario || s.nombre || "Sin nombre";
+                // Lee indistintamente de donde provenga el dato en la base de datos
+                const nombreSolicitante = s.solicitante || s.prioridad || s.nombreSolicitante || "Sin nombre";
 
                 tbody.innerHTML += `
                     <tr>
