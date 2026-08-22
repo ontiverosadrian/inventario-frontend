@@ -134,7 +134,7 @@
 
             tbody.innerHTML = "";
             solicitudes.forEach(s => {
-                // Sistema blindado para capturar el nombre sin importar cómo venga del backend
+                // Lectura blindada para mostrar el nombre del solicitante correctamente
                 const nombreSolicitante = s.solicitante || s.nombreSolicitante || s.usuario || s.nombre || "Sin nombre";
 
                 tbody.innerHTML += `
