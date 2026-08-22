@@ -69,7 +69,7 @@
                     </div>
                     <div class="form-group">
                         <label>Nombre del Solicitante</label>
-                        <input type="text" id="solicitante" required placeholder="Ej. Juan Pérez">
+                        <input type="text" id="solicitanteInput" required placeholder="Ej. Juan Pérez">
                     </div>
                     <div class="form-group">
                         <label>Observaciones</label>
@@ -113,7 +113,6 @@
         });
 
         async function cargarProductosSelect() {
-            // Se usa ?_=${Date.now()} para evitar caché del navegador
             const res = await fetch(`${API_URL}/api/productos?_=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const productos = await res.json();
             const select = document.getElementById("productoSelect");
@@ -127,13 +126,22 @@
             const res = await fetch(`${API_URL}/api/solicitudes?_=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const solicitudes = await res.json();
             const tbody = document.getElementById("listaSolicitudes");
+            
+            if (!Array.isArray(solicitudes) || solicitudes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay solicitudes registradas.</td></tr>`;
+                return;
+            }
+
             tbody.innerHTML = "";
             solicitudes.forEach(s => {
+                // Capturamos el solicitante de forma segura revisando ambas propiedades posibles
+                const nombreSolicitante = s.solicitante || s.nombreSolicitante || "Sin nombre";
+
                 tbody.innerHTML += `
                     <tr>
                         <td>${s.producto?.nombre || "N/D"}</td>
                         <td>${s.cantidad}</td>
-                        <td>${s.solicitante || "N/D"}</td>
+                        <td>${nombreSolicitante}</td>
                         <td>${s.estado}</td>
                         <td><button class="btn-danger" onclick="eliminarSolicitud('${s._id}')">Eliminar</button></td>
                     </tr>`;
@@ -148,13 +156,15 @@
                 body: JSON.stringify({
                     producto: document.getElementById("productoSelect").value,
                     cantidad: document.getElementById("cantidad").value,
-                    solicitante: document.getElementById("solicitante").value,
+                    solicitante: document.getElementById("solicitanteInput").value.trim(),
                     descripcion: document.getElementById("observaciones").value
                 })
             });
             if (res.ok) {
                 alert("Solicitud creada.");
-                window.location.reload(); // Recarga para ver stock actualizado
+                window.location.reload();
+            } else {
+                alert("Error al crear la solicitud.");
             }
         });
 
@@ -166,7 +176,7 @@
             });
             if (res.ok) {
                 alert("Solicitud eliminada.");
-                window.location.reload(); // Recarga forzada para ver stock actualizado
+                window.location.reload();
             }
         }
 
