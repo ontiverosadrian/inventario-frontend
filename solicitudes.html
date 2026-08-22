@@ -113,74 +113,105 @@
         });
 
         async function cargarProductosSelect() {
-            const res = await fetch(`${API_URL}/api/productos?_=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } });
-            const productos = await res.json();
-            const select = document.getElementById("productoSelect");
-            select.innerHTML = '<option value="">Selecciona un producto...</option>';
-            productos.forEach(p => {
-                select.innerHTML += `<option value="${p._id}">${p.nombre} (Stock: ${p.cantidad})</option>`;
-            });
+            try {
+                const res = await fetch(`${API_URL}/api/productos?_=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const productos = await res.json();
+                const select = document.getElementById("productoSelect");
+                select.innerHTML = '<option value="">Selecciona un producto...</option>';
+                productos.forEach(p => {
+                    select.innerHTML += `<option value="${p._id}">${p.nombre} (Stock: ${p.cantidad})</option>`;
+                });
+            } catch (err) {
+                console.error("Error cargando productos:", err);
+            }
         }
 
         async function cargarSolicitudes() {
-            const res = await fetch(`${API_URL}/api/solicitudes?_=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } });
-            const solicitudes = await res.json();
-            const tbody = document.getElementById("listaSolicitudes");
-            
-            if (!Array.isArray(solicitudes) || solicitudes.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay solicitudes registradas.</td></tr>`;
-                return;
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes?_=${Date.now()}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const solicitudes = await res.json();
+                const tbody = document.getElementById("listaSolicitudes");
+                
+                if (!Array.isArray(solicitudes) || solicitudes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">No hay solicitudes registradas.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = "";
+                solicitudes.forEach(s => {
+                    // Muestra de manera segura la propiedad solicitante
+                    const nombreSolicitante = s.solicitante || s.prioridad || "Sin nombre";
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${s.producto?.nombre || "N/D"}</td>
+                            <td>${s.cantidad}</td>
+                            <td>${nombreSolicitante}</td>
+                            <td>${s.estado}</td>
+                            <td><button class="btn-danger" onclick="eliminarSolicitud('${s._id}')">Eliminar</button></td>
+                        </tr>`;
+                });
+            } catch (err) {
+                console.error("Error cargando solicitudes:", err);
             }
-
-            tbody.innerHTML = "";
-            solicitudes.forEach(s => {
-                // Muestra directamente la propiedad solicitante
-                const nombreSolicitante = s.solicitante || "Sin nombre";
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${s.producto?.nombre || "N/D"}</td>
-                        <td>${s.cantidad}</td>
-                        <td>${nombreSolicitante}</td>
-                        <td>${s.estado}</td>
-                        <td><button class="btn-danger" onclick="eliminarSolicitud('${s._id}')">Eliminar</button></td>
-                    </tr>`;
-            });
         }
 
+        // ENVÍO DE DATOS DESDE EL FORMULARIO
         document.getElementById("solicitudForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const res = await fetch(`${API_URL}/api/solicitudes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({
-                    producto: document.getElementById("productoSelect").value,
-                    cantidad: document.getElementById("cantidad").value,
-                    solicitante: document.getElementById("solicitanteInput").value.trim(),
-                    descripcion: document.getElementById("observaciones").value
-                })
-            });
-            if (res.ok) {
-                alert("Solicitud creada exitosamente.");
-                window.location.reload();
-            } else {
-                alert("Error al crear la solicitud.");
+
+            const datosAEnviar = {
+                producto: document.getElementById("productoSelect").value,
+                cantidad: document.getElementById("cantidad").value,
+                solicitante: document.getElementById("solicitanteInput").value.trim(), // <--- Envía explícitamente "solicitante"
+                descripcion: document.getElementById("observaciones").value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify(datosAEnviar)
+                });
+
+                if (res.ok) {
+                    alert("Solicitud creada exitosamente.");
+                    window.location.reload();
+                } else {
+                    const errorData = await res.json();
+                    alert("Error al crear la solicitud: " + (errorData.mensaje || "Desconocido"));
+                }
+            } catch (err) {
+                console.error("Error de red:", err);
+                alert("Hubo un error de conexión con el servidor.");
             }
         });
 
         async function eliminarSolicitud(id) {
-            if (!confirm("¿Eliminar solicitud y devolver stock?")) return;
-            const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                alert("Solicitud eliminada.");
-                window.location.reload();
+            if (!confirm("¿Deseas eliminar esta solicitud y devolver el stock al producto?")) return;
+            try {
+                const res = await fetch(`${API_URL}/api/solicitudes/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    alert("Solicitud eliminada correctamente.");
+                    window.location.reload();
+                } else {
+                    alert("No se pudo eliminar la solicitud.");
+                }
+            } catch (err) {
+                console.error("Error al eliminar:", err);
             }
         }
 
-        function cerrarSesion() { localStorage.clear(); window.location.href = "login.html"; }
+        function cerrarSesion() { 
+            localStorage.clear(); 
+            window.location.href = "login.html"; 
+        }
     </script>
 </body>
 </html>
