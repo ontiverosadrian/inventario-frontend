@@ -134,8 +134,8 @@
 
             tbody.innerHTML = "";
             solicitudes.forEach(s => {
-                // Capturamos el solicitante de forma segura revisando ambas propiedades posibles
-                const nombreSolicitante = s.solicitante || s.nombreSolicitante || "Sin nombre";
+                // Sistema blindado para capturar el nombre sin importar cómo venga del backend
+                const nombreSolicitante = s.solicitante || s.nombreSolicitante || s.usuario || s.nombre || "Sin nombre";
 
                 tbody.innerHTML += `
                     <tr>
@@ -161,7 +161,7 @@
                 })
             });
             if (res.ok) {
-                alert("Solicitud creada.");
+                alert("Solicitud creada exitosamente.");
                 window.location.reload();
             } else {
                 alert("Error al crear la solicitud.");
