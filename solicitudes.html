@@ -134,8 +134,8 @@
 
             tbody.innerHTML = "";
             solicitudes.forEach(s => {
-                // Lee indistintamente de donde provenga el dato en la base de datos
-                const nombreSolicitante = s.solicitante || s.prioridad || s.nombreSolicitante || "Sin nombre";
+                // Muestra directamente la propiedad solicitante
+                const nombreSolicitante = s.solicitante || "Sin nombre";
 
                 tbody.innerHTML += `
                     <tr>
