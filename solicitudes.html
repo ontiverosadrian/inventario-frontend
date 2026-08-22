@@ -139,7 +139,7 @@
 
                 tbody.innerHTML = "";
                 solicitudes.forEach(s => {
-                    // Muestra de manera segura la propiedad solicitante
+                    // Lectura segura por si queda algún documento antiguo en la base de datos
                     const nombreSolicitante = s.solicitante || s.prioridad || "Sin nombre";
 
                     tbody.innerHTML += `
@@ -162,10 +162,13 @@
 
             const datosAEnviar = {
                 producto: document.getElementById("productoSelect").value,
-                cantidad: document.getElementById("cantidad").value,
-                solicitante: document.getElementById("solicitanteInput").value.trim(), // <--- Envía explícitamente "solicitante"
+                cantidad: Number(document.getElementById("cantidad").value),
+                solicitante: document.getElementById("solicitanteInput").value.trim(),
                 descripcion: document.getElementById("observaciones").value
             };
+
+            // Imprime en la consola del navegador (F12) lo que se enviará exactamente
+            console.log("Enviando datos al servidor:", datosAEnviar);
 
             try {
                 const res = await fetch(`${API_URL}/api/solicitudes`, {
